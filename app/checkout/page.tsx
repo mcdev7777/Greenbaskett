@@ -46,7 +46,6 @@ export default function CheckoutPage() {
     fetchCart();
   }, [fetchCart]);
 
-  // Redirect if not logged in
   useEffect(() => {
     if (!loading && !user) {
       toast.error("Please login to checkout");

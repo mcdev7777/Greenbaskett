@@ -32,7 +32,6 @@ export default function CheckoutPage() {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         {isEmpty ? (
-          // Empty Cart State
           <div className="bg-white rounded-lg p-8 md:p-12 text-center min-h-96 flex flex-col items-center justify-center">
             <div className="mb-6">
               <svg
@@ -62,7 +61,6 @@ export default function CheckoutPage() {
             </Link>
           </div>
         ) : (
-          // Checkout Content
           <div>
             {/* Checkout Section */}
             <CheckoutSection />

@@ -62,7 +62,6 @@ export default function CartPage() {
             </Link>
           </div>
         ) : (
-          // Cart with Items
           <div>
             {/* Shopping Cart Section */}
             <ShoppingCartSection />

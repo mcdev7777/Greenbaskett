@@ -22,14 +22,8 @@ export default async function ProductsPage({
           { label: "Top Cell Phones & Tablets" },
         ]}
       />
-
-      {/* Hero Banners */}
       <ProductsHero />
-
-      {/* Popular Categories */}
       <PopularCategories />
-
-      {/* Main Products Content (Filters + Grid) */}
       <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading products...</div>}>
         <ProductsContent products={products} />
       </Suspense>

@@ -37,19 +37,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
         ]}
       />
 
-      {/* Section 1: Product Detail */}
       <ProductDetailSection product={product} />
-
-      {/* Section 2: Related Products */}
       <RelatedProducts products={relatedProducts} />
-
-      {/* Section 3: Tabs (Description, Reviews, Additional Info) */}
       <ProductTabs product={product} />
-
-      {/* Section 4: Shopping Cart */}
       <ShoppingCartSection />
-
-      {/* Section 5: Checkout */}
       <CheckoutSection />
     </div>
   );

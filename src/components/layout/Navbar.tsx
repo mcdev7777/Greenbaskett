@@ -38,7 +38,7 @@ export function Navbar() {
     setMounted(true);
     fetchCart();
     fetchWishlist();
-    // Load products for search suggestions
+
     api.getProducts().then(setProducts);
   }, [fetchCart, fetchWishlist]);
 
@@ -46,7 +46,7 @@ export function Navbar() {
     e.preventDefault();
     if (searchQuery.trim()) {
       const searchTerm = searchQuery.trim();
-      // Save to recent searches
+  
       const stored = localStorage.getItem("recentSearches");
       const recent = stored ? JSON.parse(stored) : [];
       const updated = [searchTerm, ...recent.filter((s: string) => s !== searchTerm)].slice(0, 5);
@@ -65,7 +65,6 @@ export function Navbar() {
     setShowSuggestions(false);
   };
 
-  // Close suggestions when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
@@ -145,8 +144,8 @@ export function Navbar() {
               <Link href="/products" className="font-medium hover:text-green-600 transition flex items-center gap-1">
                 PRODUCTS <ChevronDown className="w-4 h-4" />
               </Link>
-              <Link href="#" className="font-medium hover:text-green-600 transition flex items-center gap-1">
-                PAGES <ChevronDown className="w-4 h-4" />
+              <Link href="about" className="font-medium hover:text-green-600 transition flex items-center gap-1">
+                ABOUT <ChevronDown className="w-4 h-4" />
               </Link>
               <Link href="/contact" className="font-medium hover:text-green-600 transition">
                 CONTACT

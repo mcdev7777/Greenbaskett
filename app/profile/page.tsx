@@ -31,15 +31,11 @@ export default function ProfilePage() {
     newPassword: "",
     confirmPassword: "",
   });
-
-  // Redirect if not logged in
   useEffect(() => {
     if (!loading && !user) {
       router.push("/login");
     }
   }, [user, loading, router]);
-
-  // Load user data
   useEffect(() => {
     if (user) {
       setFormData({
@@ -50,7 +46,6 @@ export default function ProfilePage() {
     }
   }, [user]);
 
-  // Load orders when orders tab is active
   useEffect(() => {
     if (activeTab === "orders" && user) {
       loadOrders();
