@@ -2,21 +2,30 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { Eye, EyeOff } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false);
+  const { signIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log("Login:", { email, password });
+    setLoading(true);
+    
+    try {
+      await signIn(email, password);
+    } catch (error) {
+      console.error("Login error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -30,100 +39,80 @@ export default function LoginPage() {
       />
 
       <section className="container mx-auto px-4 py-12">
-        <div className="max-w-5xl mx-auto bg-white rounded-lg shadow-sm p-8 md:p-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            {/* Left: Illustration */}
-            <div className="hidden md:block">
-              <div className="relative w-full h-96">
-                {/* Placeholder for illustration - replace with actual image */}
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-green-50 rounded-lg">
-                  <div className="text-center">
-                    <div className="text-6xl mb-4">🔐</div>
-                    <p className="text-gray-600">Secure Login</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+        <div className="max-w-md mx-auto bg-white rounded-lg p-8 shadow-sm">
+          <h1 className="text-3xl font-bold mb-2">Login</h1>
+          <p className="text-gray-600 mb-8">
+            Enter your email and password to login
+          </p>
 
-            {/* Right: Login Form */}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Email */}
             <div>
-              <h1 className="text-4xl font-bold text-green-600 mb-2">Welcome Back</h1>
-              <p className="text-gray-500 mb-8 uppercase text-sm tracking-wide">
-                LOGIN TO CONTINUE
-              </p>
-
-              <form onSubmit={handleLogin} className="space-y-6">
-                {/* Email */}
-                <div>
-                  <label className="block text-sm font-semibold mb-2">
-                    Email Address
-                  </label>
-                  <Input
-                    type="email"
-                    placeholder="Example@gmail.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="h-12"
-                  />
-                </div>
-
-                {/* Password */}
-                <div>
-                  <label className="block text-sm font-semibold mb-2">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <Input
-                      type={showPassword ? "text" : "password"}
-                      placeholder="••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      className="h-12 pr-12"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-5 h-5" />
-                      ) : (
-                        <Eye className="w-5 h-5" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Forget Password */}
-                <div className="text-right">
-                  <Link
-                    href="/forgot-password"
-                    className="text-sm text-gray-500 hover:text-green-600"
-                  >
-                    Forget Password ?
-                  </Link>
-                </div>
-
-                {/* Login Button */}
-                <Button
-                  type="submit"
-                  className="w-full h-12 bg-green-600 hover:bg-green-700 text-white text-base font-semibold"
-                >
-                  LOGIN
-                </Button>
-
-                {/* Sign Up Link */}
-                <p className="text-center text-sm">
-                  <span className="text-gray-500">NEW USER ? </span>
-                  <Link href="/register" className="text-green-600 font-semibold hover:underline">
-                    SIGN UP
-                  </Link>
-                </p>
-              </form>
+              <label className="block text-sm font-semibold mb-2">
+                Email <span className="text-red-600">*</span>
+              </label>
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                required
+                className="h-12"
+              />
             </div>
-          </div>
+
+            {/* Password */}
+            <div>
+              <label className="block text-sm font-semibold mb-2">
+                Password <span className="text-red-600">*</span>
+              </label>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                required
+                className="h-12"
+              />
+            </div>
+
+            {/* Remember Me & Forgot Password */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="remember"
+                  checked={rememberMe}
+                  onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                />
+                <label htmlFor="remember" className="text-sm cursor-pointer">
+                  Remember me
+                </label>
+              </div>
+              <Link
+                href="/forgot-password"
+                className="text-sm text-green-600 hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
+
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-green-600 hover:bg-green-700 text-white h-12"
+            >
+              {loading ? "Logging in..." : "LOGIN"}
+            </Button>
+          </form>
+
+          {/* Sign Up Link */}
+          <p className="text-center mt-6 text-sm text-gray-600">
+            Don't have an account?{" "}
+            <Link href="/register" className="text-green-600 font-semibold hover:underline">
+              Sign up
+            </Link>
+          </p>
         </div>
       </section>
     </div>

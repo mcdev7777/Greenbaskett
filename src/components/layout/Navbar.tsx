@@ -1,15 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { Search, Heart, ShoppingCart, User, Phone, ChevronDown } from "lucide-react";
+import { Search, Heart, ShoppingCart, User, Phone, ChevronDown, LogOut } from "lucide-react";
 import { useCartStore } from "@/store/cart-store";
 import { useWishlistStore } from "@/store/wishlist-store";
+import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { formatPrice } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { api } from "@/lib/api";
 import { SearchSuggestions } from "./SearchSuggestions";
 import { Product } from "@/types";
@@ -17,6 +25,7 @@ import { Product } from "@/types";
 export function Navbar() {
   const { items, getTotal, getItemCount, fetchCart } = useCartStore();
   const { getItemCount: getWishlistItemCount, fetchWishlist } = useWishlistStore();
+  const { user, signOut, loading } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -158,11 +167,60 @@ export function Navbar() {
                 )}
               </Link>
               
-              <div className="hidden lg:flex flex-col items-end">
-                <span className="text-xs text-gray-500">WELCOME</span>
-                <Link href="/login" className="text-sm font-bold hover:text-green-600">
-                  LOG IN / REGISTER
-                </Link>
+              {/* User Menu - Updated with Auth */}
+              <div className="hidden lg:flex">
+                {!loading && (
+                  <>
+                    {user ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className="flex flex-col items-end hover:text-green-600 transition outline-none">
+                            <span className="text-xs text-gray-500">WELCOME</span>
+                            <span className="text-sm font-bold flex items-center gap-1">
+                              {user.user_metadata?.full_name || user.email?.split('@')[0]}
+                              <ChevronDown className="w-3 h-3" />
+                            </span>
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuItem asChild>
+                            <Link href="/profile" className="flex items-center gap-2 cursor-pointer">
+                              <User className="w-4 h-4" />
+                              My Profile
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link href="/profile" className="flex items-center gap-2 cursor-pointer">
+                              <ShoppingCart className="w-4 h-4" />
+                              My Orders
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link href="/wishlist" className="flex items-center gap-2 cursor-pointer">
+                              <Heart className="w-4 h-4" />
+                              Wishlist
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() => signOut()}
+                            className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600"
+                          >
+                            <LogOut className="w-4 h-4" />
+                            Logout
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : (
+                      <div className="flex flex-col items-end">
+                        <span className="text-xs text-gray-500">WELCOME</span>
+                        <Link href="/login" className="text-sm font-bold hover:text-green-600">
+                          LOG IN / REGISTER
+                        </Link>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
 
               <Link href="/cart" className="flex items-center gap-3 hover:opacity-80 transition">

@@ -1,105 +1,121 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ChevronRight, Package, Truck, CheckCircle, XCircle } from "lucide-react";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/utils";
-
-// Mock orders data
-const mockOrders = [
-  {
-    id: "ORD-2024-001",
-    date: "2024-01-15",
-    status: "delivered",
-    total: 1458.00,
-    items: [
-      {
-        id: "1",
-        name: "Wireless Headphones",
-        image: "https://via.placeholder.com/80",
-        price: 79.99,
-        quantity: 2,
-      },
-      {
-        id: "2",
-        name: "Smart Watch Series 5",
-        image: "https://via.placeholder.com/80",
-        price: 299.99,
-        quantity: 1,
-      },
-    ],
-  },
-  {
-    id: "ORD-2024-002",
-    date: "2024-01-20",
-    status: "shipped",
-    total: 579.00,
-    items: [
-      {
-        id: "3",
-        name: "Running Shoes Pro",
-        image: "https://via.placeholder.com/80",
-        price: 129.99,
-        quantity: 1,
-      },
-      {
-        id: "4",
-        name: "Wireless Headphones",
-        image: "https://via.placeholder.com/80",
-        price: 79.99,
-        quantity: 1,
-      },
-    ],
-  },
-  {
-    id: "ORD-2024-003",
-    date: "2024-01-25",
-    status: "processing",
-    total: 849.00,
-    items: [
-      {
-        id: "5",
-        name: "Smart Coffee Maker",
-        image: "https://via.placeholder.com/80",
-        price: 199.99,
-        quantity: 1,
-      },
-    ],
-  },
-  {
-    id: "ORD-2023-156",
-    date: "2023-12-10",
-    status: "cancelled",
-    total: 299.00,
-    items: [
-      {
-        id: "6",
-        name: "Yoga Mat Premium",
-        image: "https://via.placeholder.com/80",
-        price: 49.99,
-        quantity: 1,
-      },
-    ],
-  },
-];
+import { useAuth } from "@/context/AuthContext";
+import { api } from "@/lib/api";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
 export default function ProfilePage() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"account" | "orders" | "address" | "password">("account");
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: "Mark",
-    lastName: "Cole",
-    email: "swoo@gmail.com",
-    phone: "+1 0231 4554 452",
+    fullName: "",
+    email: "",
+    phone: "",
+  });
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
 
-  const handleSave = (e: React.FormEvent) => {
+  // Redirect if not logged in
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
+
+  // Load user data
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        fullName: user.user_metadata?.full_name || "",
+        email: user.email || "",
+        phone: user.user_metadata?.phone || "",
+      });
+    }
+  }, [user]);
+
+  // Load orders when orders tab is active
+  useEffect(() => {
+    if (activeTab === "orders" && user) {
+      loadOrders();
+    }
+  }, [activeTab, user]);
+
+  const loadOrders = async () => {
+    setLoadingOrders(true);
+    try {
+      const userOrders = await api.getOrders(user?.id);
+      setOrders(userOrders);
+    } catch (error) {
+      console.error("Failed to load orders:", error);
+    } finally {
+      setLoadingOrders(false);
+    }
+  };
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Save profile:", formData);
+    
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          full_name: formData.fullName,
+          phone: formData.phone,
+        },
+      });
+
+      if (error) throw error;
+      toast.success("Profile updated successfully!");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update profile");
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error("Passwords don't match!");
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: passwordData.newPassword,
+      });
+
+      if (error) throw error;
+      
+      toast.success("Password updated successfully!");
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update password");
+    }
   };
 
   const getStatusIcon = (status: string) => {
@@ -132,6 +148,21 @@ export default function ProfilePage() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl mb-4">⏳</div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Breadcrumb
@@ -152,8 +183,10 @@ export default function ProfilePage() {
                 <div className="w-32 h-32 mx-auto mb-4 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
                   <div className="text-6xl">👤</div>
                 </div>
-                <h3 className="font-bold text-lg mb-1">Mark Cole</h3>
-                <p className="text-sm text-gray-600">swoo@gmail.com</p>
+                <h3 className="font-bold text-lg mb-1">
+                  {user.user_metadata?.full_name || "User"}
+                </h3>
+                <p className="text-sm text-gray-600">{user.email}</p>
               </div>
 
               {/* Menu */}
@@ -216,54 +249,37 @@ export default function ProfilePage() {
               {activeTab === "account" && (
                 <>
                   <h2 className="text-2xl font-bold mb-8">Account Info</h2>
-                  <form onSubmit={handleSave} className="space-y-6">
-                    {/* Name Fields */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-semibold mb-2">
-                          First Name <span className="text-red-600">*</span>
-                        </label>
-                        <Input
-                          type="text"
-                          value={formData.firstName}
-                          onChange={(e) =>
-                            setFormData({ ...formData, firstName: e.target.value })
-                          }
-                          required
-                          className="h-12"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-semibold mb-2">
-                          Last Name <span className="text-red-600">*</span>
-                        </label>
-                        <Input
-                          type="text"
-                          value={formData.lastName}
-                          onChange={(e) =>
-                            setFormData({ ...formData, lastName: e.target.value })
-                          }
-                          required
-                          className="h-12"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Email */}
+                  <form onSubmit={handleSaveProfile} className="space-y-6">
+                    {/* Full Name */}
                     <div>
                       <label className="block text-sm font-semibold mb-2">
-                        Email Address <span className="text-red-600">*</span>
+                        Full Name <span className="text-red-600">*</span>
                       </label>
                       <Input
-                        type="email"
-                        value={formData.email}
+                        type="text"
+                        value={formData.fullName}
                         onChange={(e) =>
-                          setFormData({ ...formData, email: e.target.value })
+                          setFormData({ ...formData, fullName: e.target.value })
                         }
                         required
                         className="h-12"
                       />
+                    </div>
+
+                    {/* Email (Read-only) */}
+                    <div>
+                      <label className="block text-sm font-semibold mb-2">
+                        Email Address
+                      </label>
+                      <Input
+                        type="email"
+                        value={formData.email}
+                        disabled
+                        className="h-12 bg-gray-50"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Email cannot be changed
+                      </p>
                     </div>
 
                     {/* Phone */}
@@ -297,12 +313,17 @@ export default function ProfilePage() {
                 <>
                   <div className="flex items-center justify-between mb-8">
                     <h2 className="text-2xl font-bold">My Orders</h2>
-                    <p className="text-sm text-gray-600">{mockOrders.length} orders</p>
+                    <p className="text-sm text-gray-600">{orders.length} orders</p>
                   </div>
 
-                  {mockOrders.length > 0 ? (
+                  {loadingOrders ? (
+                    <div className="text-center py-12">
+                      <div className="text-4xl mb-4">⏳</div>
+                      <p className="text-gray-600">Loading orders...</p>
+                    </div>
+                  ) : orders.length > 0 ? (
                     <div className="space-y-6">
-                      {mockOrders.map((order) => (
+                      {orders.map((order) => (
                         <div
                           key={order.id}
                           className="border rounded-lg p-6 hover:shadow-md transition"
@@ -314,7 +335,7 @@ export default function ProfilePage() {
                               <div>
                                 <p className="font-bold text-lg">{order.id}</p>
                                 <p className="text-sm text-gray-600">
-                                  Placed on {new Date(order.date).toLocaleDateString('en-US', {
+                                  Placed on {new Date(order.created_at).toLocaleDateString('en-US', {
                                     year: 'numeric',
                                     month: 'long',
                                     day: 'numeric'
@@ -329,33 +350,6 @@ export default function ProfilePage() {
                                 <p className="font-bold text-lg">{formatPrice(order.total)}</p>
                               </div>
                             </div>
-                          </div>
-
-                          {/* Order Items */}
-                          <div className="space-y-4 mb-4">
-                            {order.items.map((item) => (
-                              <div key={item.id} className="flex gap-4">
-                                <div className="relative w-20 h-20 bg-gray-100 rounded flex-shrink-0">
-                                  <Image
-                                    src={"https://i.pinimg.com/736x/e9/bc/01/e9bc01c2d889ce6b37cd9a3e4a8e7ec2.jpg"}
-                                    alt={item.name}
-                                    fill
-                                    className="object-contain p-2"
-                                  />
-                                </div>
-                                <div className="flex-1">
-                                  <h4 className="font-semibold mb-1">{item.name}</h4>
-                                  <p className="text-sm text-gray-600">
-                                    Qty: {item.quantity} × {formatPrice(item.price)}
-                                  </p>
-                                </div>
-                                <div className="text-right">
-                                  <p className="font-semibold">
-                                    {formatPrice(item.price * item.quantity)}
-                                  </p>
-                                </div>
-                              </div>
-                            ))}
                           </div>
 
                           {/* Order Actions */}
@@ -411,26 +405,43 @@ export default function ProfilePage() {
               {activeTab === "password" && (
                 <div>
                   <h2 className="text-2xl font-bold mb-8">Change Password</h2>
-                  <form className="space-y-6 max-w-xl">
+                  <form onSubmit={handleChangePassword} className="space-y-6 max-w-xl">
                     <div>
                       <label className="block text-sm font-semibold mb-2">
-                        Current Password
+                        New Password <span className="text-red-600">*</span>
                       </label>
-                      <Input type="password" className="h-12" />
+                      <Input
+                        type="password"
+                        value={passwordData.newPassword}
+                        onChange={(e) =>
+                          setPasswordData({ ...passwordData, newPassword: e.target.value })
+                        }
+                        placeholder="Minimum 6 characters"
+                        required
+                        minLength={6}
+                        className="h-12"
+                      />
                     </div>
                     <div>
                       <label className="block text-sm font-semibold mb-2">
-                        New Password
+                        Confirm New Password <span className="text-red-600">*</span>
                       </label>
-                      <Input type="password" className="h-12" />
+                      <Input
+                        type="password"
+                        value={passwordData.confirmPassword}
+                        onChange={(e) =>
+                          setPasswordData({ ...passwordData, confirmPassword: e.target.value })
+                        }
+                        placeholder="Re-enter your password"
+                        required
+                        minLength={6}
+                        className="h-12"
+                      />
                     </div>
-                    <div>
-                      <label className="block text-sm font-semibold mb-2">
-                        Confirm New Password
-                      </label>
-                      <Input type="password" className="h-12" />
-                    </div>
-                    <Button className="bg-green-600 hover:bg-green-700 text-white px-12 h-12">
+                    <Button
+                      type="submit"
+                      className="bg-green-600 hover:bg-green-700 text-white px-12 h-12"
+                    >
                       UPDATE PASSWORD
                     </Button>
                   </form>

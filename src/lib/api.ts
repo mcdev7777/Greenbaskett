@@ -2,7 +2,6 @@ import { Product, CartItem, Order } from '@/types';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 
-
 const transformSupabaseProduct = (data: any): Product => ({
   id: data.id,
   name: data.name,
@@ -21,6 +20,15 @@ const transformSupabaseProduct = (data: any): Product => ({
   inventory: data.inventory || 0,
   isActive: true,
 });
+
+// Helper to get current user ID
+const getCurrentUserId = async (): Promise<string> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+  return user.id;
+};
 
 export const api = {
   getProducts: async (): Promise<Product[]> => {
@@ -120,9 +128,12 @@ export const api = {
   // ============ CART ============
   getCart: async (): Promise<CartItem[]> => {
     try {
+      const userId = await getCurrentUserId();
+      
       const { data, error } = await supabase
         .from('cart')
-        .select(`*, product:products(*)`);
+        .select(`*, product:products(*)`)
+        .eq('user_id', userId);
 
       if (error) throw error;
       
@@ -133,6 +144,9 @@ export const api = {
         product: transformSupabaseProduct(item.product),
       }));
     } catch (error: any) {
+      if (error.message === 'User not authenticated') {
+        return []; // Return empty cart for non-authenticated users
+      }
       toast.error('Failed to fetch cart');
       throw error;
     }
@@ -140,7 +154,7 @@ export const api = {
 
   addToCart: async (productId: string, quantity: number = 1): Promise<CartItem> => {
     try {
-      const userId = 'temp-user-id';
+      const userId = await getCurrentUserId();
 
       const { data: existing } = await supabase
         .from('cart')
@@ -184,7 +198,11 @@ export const api = {
         };
       }
     } catch (error: any) {
-      toast.error('Failed to add item to cart');
+      if (error.message === 'User not authenticated') {
+        toast.error('Please login to add items to cart');
+      } else {
+        toast.error('Failed to add item to cart');
+      }
       throw error;
     }
   },
@@ -230,7 +248,7 @@ export const api = {
 
   clearCart: async (): Promise<void> => {
     try {
-      const userId = 'temp-user-id';
+      const userId = await getCurrentUserId();
       const { error } = await supabase.from('cart').delete().eq('user_id', userId);
       if (error) throw error;
       toast.success('Cart cleared');
@@ -243,9 +261,12 @@ export const api = {
   // ============ WISHLIST ============
   getWishlist: async () => {
     try {
+      const userId = await getCurrentUserId();
+      
       const { data, error } = await supabase
         .from('wishlist')
-        .select(`*, product:products(*)`);
+        .select(`*, product:products(*)`)
+        .eq('user_id', userId);
 
       if (error) throw error;
       
@@ -255,6 +276,9 @@ export const api = {
         product: transformSupabaseProduct(item.product),
       }));
     } catch (error: any) {
+      if (error.message === 'User not authenticated') {
+        return []; // Return empty wishlist for non-authenticated users
+      }
       toast.error('Failed to fetch wishlist');
       throw error;
     }
@@ -262,7 +286,7 @@ export const api = {
 
   addToWishlist: async (productId: string) => {
     try {
-      const userId = 'temp-user-id';
+      const userId = await getCurrentUserId();
 
       const { data: existing } = await supabase
         .from('wishlist')
@@ -291,14 +315,18 @@ export const api = {
         product: transformSupabaseProduct(data.product),
       };
     } catch (error: any) {
-      toast.error('Failed to add to wishlist');
+      if (error.message === 'User not authenticated') {
+        toast.error('Please login to add items to wishlist');
+      } else {
+        toast.error('Failed to add to wishlist');
+      }
       throw error;
     }
   },
 
   removeFromWishlist: async (productId: string): Promise<void> => {
     try {
-      const userId = 'temp-user-id';
+      const userId = await getCurrentUserId();
       const { error } = await supabase
         .from('wishlist')
         .delete()
@@ -316,10 +344,12 @@ export const api = {
   // ============ ORDERS ============
   createOrder: async (order: Omit<Order, 'id'>): Promise<Order> => {
     try {
+      const userId = await getCurrentUserId();
+      
       const { data, error } = await supabase
         .from('orders')
         .insert({
-          user_id: 'temp-user-id',
+          user_id: userId,
           total: order.total,
           status: 'processing',
         })
@@ -338,10 +368,13 @@ export const api = {
 
   getOrders: async (userId?: string): Promise<Order[]> => {
     try {
-      let query = supabase.from('orders').select('*');
-      if (userId) query = query.eq('user_id', userId);
+      const currentUserId = userId || await getCurrentUserId();
+      
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('user_id', currentUserId);
 
-      const { data, error } = await query;
       if (error) throw error;
       return data as Order[];
     } catch (error: any) {
