@@ -54,8 +54,7 @@ export function RecentlyViewed({ products: initialProducts }: RecentlyViewedProp
             </div>
           </div>
         </div>
-
-        {/* Products Grid */}
+        
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {loading ? (
             <p className="col-span-full text-center text-gray-600">Loading products...</p>
