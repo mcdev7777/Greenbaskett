@@ -75,7 +75,7 @@
     {
       "id": "173e",
       "productId": "3",
-      "quantity": 1,
+      "quantity": 8,
       "product": {
         "id": "3",
         "name": "Running Shoes",
@@ -88,6 +88,25 @@
         ],
         "category": "Fashion",
         "inventory": 100,
+        "isActive": true
+      }
+    },
+    {
+      "id": "6996",
+      "productId": "2",
+      "quantity": 1,
+      "product": {
+        "id": "2",
+        "name": "Smart Watch",
+        "slug": "smart-watch",
+        "description": "Fitness tracking smartwatch with heart rate monitor and GPS",
+        "price": 249.99,
+        "compareAtPrice": null,
+        "images": [
+          "/images/watch.jpg"
+        ],
+        "category": "Electronics",
+        "inventory": 30,
         "isActive": true
       }
     }
