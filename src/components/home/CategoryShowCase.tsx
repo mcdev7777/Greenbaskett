@@ -98,16 +98,16 @@ const sections = [
 
 export function CategoryShowcase() {
   return (
-    <section className="container mx-auto px-4 py-12">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <section className="container mx-auto px-4 py-8 sm:py-12">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
         {sections.map((section) => (
-          <div key={section.title} className="bg-white rounded-lg p-6 shadow-sm">
+          <div key={section.title} className="bg-white rounded-lg p-4 sm:p-6 shadow-sm">
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold">{section.title}</h2>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-2">
+              <h2 className="text-lg sm:text-xl font-bold">{section.title}</h2>
               <Link
                 href={`/products?category=${section.title.toLowerCase()}`}
-                className="text-sm text-gray-600 hover:text-green-600 transition"
+                className="text-xs sm:text-sm text-gray-600 hover:text-green-600 transition"
               >
                 View All
               </Link>
@@ -115,7 +115,7 @@ export function CategoryShowcase() {
 
             {/* Featured Product Banner */}
             <div
-              className={`bg-gradient-to-br ${section.featured.bgColor} rounded-lg p-6 mb-6 h-48 flex flex-col justify-between relative overflow-hidden`}
+              className={`bg-gradient-to-br ${section.featured.bgColor} rounded-lg p-4 sm:p-6 mb-4 sm:mb-6 h-36 sm:h-48 flex flex-col justify-between relative overflow-hidden`}
             >
               {/* Background Image */}
               <Image
@@ -132,7 +132,7 @@ export function CategoryShowcase() {
                   </p>
                 )}
                 <h3
-                  className={`text-xl font-bold ${
+                  className={`text-base sm:text-xl font-bold ${
                     section.featured.textColor || "text-white"
                   }`}
                 >
@@ -142,14 +142,14 @@ export function CategoryShowcase() {
             </div>
 
             {/* Category Grid */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               {section.categories.map((category) => (
                 <Link
                   key={category.name}
                   href={`/products?category=${category.name.toLowerCase()}`}
-                  className="flex flex-col items-center justify-center p-4 hover:bg-gray-50 rounded-lg transition group"
+                  className="flex flex-col items-center justify-center p-3 sm:p-4 hover:bg-gray-50 rounded-lg transition group"
                 >
-                  <div className="relative w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition overflow-hidden">
+                  <div className="relative w-16 sm:w-20 h-16 sm:h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mb-2 sm:mb-3 group-hover:scale-110 transition overflow-hidden flex-shrink-0">
                     <Image
                       src={category.image}
                       alt={category.name}
@@ -157,7 +157,7 @@ export function CategoryShowcase() {
                       className="object-cover"
                     />
                   </div>
-                  <h4 className="font-semibold text-sm text-center mb-1">
+                  <h4 className="font-semibold text-xs sm:text-sm text-center mb-1">
                     {category.name}
                   </h4>
                   <p className="text-xs text-gray-500">{category.count} Items</p>

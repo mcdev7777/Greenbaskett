@@ -51,15 +51,15 @@ export function DealsOfTheDay() {
   const soldPercentage = (26 / 75) * 100;
 
   return (
-    <section className="container mx-auto px-4 py-12">
+    <section className="container mx-auto px-4 py-8 sm:py-12">
       {/* Header */}
-      <div className="bg-green-600 rounded-t-lg px-8 py-4 flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-white">DEALS OF THE DAY</h2>
-        <div className="flex items-center gap-4">
-          <div className="flex gap-2">
-            <button className="text-white text-sm hover:underline">New</button>
-            <button className="text-white text-sm hover:underline">Featured</button>
-            <button className="text-white text-sm hover:underline">Top Rated</button>
+      <div className="bg-green-600 rounded-t-lg px-4 sm:px-8 py-3 sm:py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+        <h2 className="text-xl sm:text-2xl font-bold text-white">DEALS OF THE DAY</h2>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
+          <div className="flex gap-1 sm:gap-2 flex-wrap">
+            <button className="text-white text-xs sm:text-sm hover:underline">New</button>
+            <button className="text-white text-xs sm:text-sm hover:underline">Featured</button>
+            <button className="text-white text-xs sm:text-sm hover:underline">Top Rated</button>
           </div>
           <div className="flex gap-2">
             <button className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded flex items-center justify-center text-white">
@@ -73,10 +73,10 @@ export function DealsOfTheDay() {
       </div>
 
       {/* Main Content */}
-      <div className="bg-white rounded-b-lg p-8 shadow-sm">
-        <div className="grid grid-cols-12 gap-6">
-          {/* Left Thumbnails */}
-          <div className="col-span-1 space-y-4">
+      <div className="bg-white rounded-b-lg p-4 sm:p-8 shadow-sm overflow-x-hidden">
+        <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 sm:gap-6">
+          {/* Left Thumbnails - Hidden on mobile */}
+          <div className="col-span-1 space-y-4 hidden sm:flex sm:flex-col">
             {dealImages.thumbnails.map((thumb, i) => (
               <div
                 key={i}
@@ -95,14 +95,14 @@ export function DealsOfTheDay() {
           </div>
 
           {/* Main Product Image */}
-          <div className="col-span-12 md:col-span-3 relative">
-            <Badge className="absolute top-0 left-0 z-10 bg-green-600 hover:bg-green-600 text-white px-4 py-2">
+          <div className="col-span-1 sm:col-span-3 relative flex items-center justify-center">
+            <Badge className="absolute top-0 left-0 z-10 bg-green-600 hover:bg-green-600 text-white px-3 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm">
               SAVE
               <br />
               $199.00
             </Badge>
             <div className="flex items-center justify-center h-full">
-              <div className="relative w-64 h-80 bg-gray-100 rounded-lg overflow-hidden">
+              <div className="relative w-48 sm:w-64 h-56 sm:h-80 bg-gray-100 rounded-lg overflow-hidden">
                 <Image
                   src={dealImages.mainProduct}
                   alt="Xioma Redmi Note 11 Pro"
@@ -114,8 +114,8 @@ export function DealsOfTheDay() {
           </div>
 
           {/* Product Details */}
-          <div className="col-span-12 md:col-span-5">
-            <div className="flex items-center gap-2 mb-2 text-sm text-gray-600">
+          <div className="col-span-1 sm:col-span-5">
+            <div className="flex items-center gap-2 mb-2 text-xs sm:text-sm text-gray-600">
               <div className="flex items-center">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
@@ -124,16 +124,16 @@ export function DealsOfTheDay() {
               <span>(12)</span>
             </div>
 
-            <h3 className="text-2xl font-bold mb-4">
+            <h3 className="text-lg sm:text-2xl font-bold mb-3 sm:mb-4">
               Xioma Redmi Note 11 Pro 256GB 2023, Black Smartphone
             </h3>
 
-            <div className="flex items-center gap-3 mb-6">
-              <span className="text-3xl font-bold text-red-600">$569.00</span>
-              <span className="text-xl text-gray-400 line-through">$759.00</span>
+            <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+              <span className="text-2xl sm:text-3xl font-bold text-red-600">$569.00</span>
+              <span className="text-base sm:text-xl text-gray-400 line-through">$759.00</span>
             </div>
 
-            <ul className="space-y-2 mb-6 text-sm text-gray-700">
+            <ul className="space-y-1 sm:space-y-2 mb-4 sm:mb-6 text-xs sm:text-sm text-gray-700">
               <li className="flex items-start">
                 <span className="mr-2">•</span>
                 Intel LGA 1700 Socket: Supports 13th & 12th Gen Intel Core
@@ -148,35 +148,35 @@ export function DealsOfTheDay() {
               </li>
             </ul>
 
-            <div className="flex gap-4 mb-6">
-              <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
+            <div className="flex gap-2 sm:gap-4 mb-4 sm:mb-6 flex-wrap">
+              <Badge className="bg-green-100 text-green-700 hover:bg-green-100 text-xs">
                 FREE SHIPPING
               </Badge>
-              <Badge className="bg-red-100 text-red-700 hover:bg-red-100">
+              <Badge className="bg-red-100 text-red-700 hover:bg-red-100 text-xs">
                 FREE GIFT
               </Badge>
             </div>
 
             {/* Countdown Timer */}
-            <div className="mb-6">
-              <p className="text-sm font-semibold mb-3">
+            <div className="mb-4 sm:mb-6">
+              <p className="text-xs sm:text-sm font-semibold mb-2 sm:mb-3">
                 HURRY UP! PROMOTION WILL EXPIRES IN
               </p>
-              <div className="flex gap-2">
-                <div className="bg-gray-100 rounded-lg px-4 py-3 text-center min-w-[70px]">
-                  <div className="text-2xl font-bold">{timeLeft.days}</div>
+              <div className="flex gap-1 sm:gap-2">
+                <div className="bg-gray-100 rounded-lg px-2 sm:px-4 py-2 sm:py-3 text-center min-w-[50px] sm:min-w-[70px]">
+                  <div className="text-lg sm:text-2xl font-bold">{timeLeft.days}</div>
                   <div className="text-xs text-gray-600">d</div>
                 </div>
-                <div className="bg-gray-100 rounded-lg px-4 py-3 text-center min-w-[70px]">
-                  <div className="text-2xl font-bold">{timeLeft.hours}</div>
+                <div className="bg-gray-100 rounded-lg px-2 sm:px-4 py-2 sm:py-3 text-center min-w-[50px] sm:min-w-[70px]">
+                  <div className="text-lg sm:text-2xl font-bold">{timeLeft.hours}</div>
                   <div className="text-xs text-gray-600">h</div>
                 </div>
-                <div className="bg-gray-100 rounded-lg px-4 py-3 text-center min-w-[70px]">
-                  <div className="text-2xl font-bold">{timeLeft.minutes}</div>
+                <div className="bg-gray-100 rounded-lg px-2 sm:px-4 py-2 sm:py-3 text-center min-w-[50px] sm:min-w-[70px]">
+                  <div className="text-lg sm:text-2xl font-bold">{timeLeft.minutes}</div>
                   <div className="text-xs text-gray-600">m</div>
                 </div>
-                <div className="bg-gray-100 rounded-lg px-4 py-3 text-center min-w-[70px]">
-                  <div className="text-2xl font-bold">{timeLeft.seconds}</div>
+                <div className="bg-gray-100 rounded-lg px-2 sm:px-4 py-2 sm:py-3 text-center min-w-[50px] sm:min-w-[70px]">
+                  <div className="text-lg sm:text-2xl font-bold">{timeLeft.seconds}</div>
                   <div className="text-xs text-gray-600">s</div>
                 </div>
               </div>
@@ -190,34 +190,34 @@ export function DealsOfTheDay() {
                   style={{ width: `${soldPercentage}%` }}
                 />
               </div>
-              <p className="text-sm text-gray-600">
+              <p className="text-xs sm:text-sm text-gray-600">
                 Sold: <span className="font-semibold">26/75</span>
               </p>
             </div>
           </div>
 
-          {/* Right Promotional Banners */}
-          <div className="col-span-12 md:col-span-3 space-y-4">
+          {/* Right Promotional Banners - Stack on mobile */}
+          <div className="col-span-1 sm:col-span-3 space-y-3 sm:space-y-4">
             {/* Gaming Controller Banner */}
-            <div className="relative bg-gradient-to-br from-gray-700 to-gray-900 rounded-lg p-6 h-48 overflow-hidden">
+            <div className="relative bg-gradient-to-br from-gray-700 to-gray-900 rounded-lg p-4 sm:p-6 h-40 sm:h-48 overflow-hidden">
               <Image
                 src={dealImages.gameController}
                 alt="Gaming Controller Sale"
                 fill
                 className="object-cover opacity-30"
               />
-              <Badge className="absolute top-4 right-4 z-10 bg-yellow-400 text-black hover:bg-yellow-400 font-bold">
+              <Badge className="absolute top-2 sm:top-4 right-2 sm:right-4 z-10 bg-yellow-400 text-black hover:bg-yellow-400 font-bold text-xs sm:text-base">
                 50%
               </Badge>
               <div className="relative z-10">
-                <div className="text-5xl font-bold text-white opacity-70">
+                <div className="text-3xl sm:text-5xl font-bold text-white opacity-70">
                   SALE
                 </div>
               </div>
             </div>
 
             {/* Tablets Banner */}
-            <div className="relative bg-gradient-to-br from-green-800 to-green-900 rounded-lg p-6 h-48 overflow-hidden">
+            <div className="relative bg-gradient-to-br from-green-800 to-green-900 rounded-lg p-4 sm:p-6 h-40 sm:h-48 overflow-hidden">
               <Image
                 src={dealImages.tablet}
                 alt="Tablets"
@@ -225,7 +225,7 @@ export function DealsOfTheDay() {
                 className="object-cover opacity-40"
               />
               <div className="relative z-10">
-                <div className="text-white font-bold text-xl">Tablets</div>
+                <div className="text-white font-bold text-lg sm:text-xl">Tablets</div>
               </div>
             </div>
           </div>
@@ -233,8 +233,8 @@ export function DealsOfTheDay() {
       </div>
 
       {/* Bottom Banner */}
-      <div className="bg-yellow-100 rounded-b-lg px-8 py-4 mt-0 border-t">
-        <p className="text-center text-sm">
+      <div className="bg-yellow-100 rounded-b-lg px-4 sm:px-8 py-3 sm:py-4 mt-0 border-t">
+        <p className="text-center text-xs sm:text-sm">
           🏆 Member get <span className="font-bold">FREE SHIPPING*</span> with no order
           minimum! *Restriction apply free 30-days trial
         </p>

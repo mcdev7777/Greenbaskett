@@ -53,28 +53,28 @@ const categories = [
 
 export function FeaturedSection() {
   return (
-    <section className="container mx-auto px-4 py-12">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <section className="container mx-auto px-4 py-8 sm:py-12">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Featured Brands - Left */}
-        <div className="bg-white rounded-lg p-8 shadow-sm">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold">FEATURED BRANDS</h2>
+        <div className="bg-white rounded-lg p-6 sm:p-8 shadow-sm">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-2">
+            <h2 className="text-xl sm:text-2xl font-bold">FEATURED BRANDS</h2>
             <Link
               href="/brands"
-              className="text-sm text-gray-600 hover:text-green-600 transition"
+              className="text-xs sm:text-sm text-gray-600 hover:text-green-600 transition"
             >
               View All
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 sm:gap-6">
             {brands.map((brand) => (
               <Link
                 key={brand.name}
                 href={`/brands/${brand.name.toLowerCase()}`}
-                className="flex items-center justify-center p-4 hover:opacity-70 transition bg-gray-50 rounded-lg"
+                className="flex items-center justify-center p-2 sm:p-4 hover:opacity-70 transition bg-gray-50 rounded-lg"
               >
-                <div className="relative w-20 h-12">
+                <div className="relative w-16 sm:w-20 h-10 sm:h-12">
                   <Image
                     src={brand.logo}
                     alt={brand.name}
@@ -88,28 +88,28 @@ export function FeaturedSection() {
         </div>
 
         {/* Top Categories - Right */}
-        <div className="bg-white rounded-lg p-8 shadow-sm">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold">TOP CATEGORIES</h2>
+        <div className="bg-white rounded-lg p-6 sm:p-8 shadow-sm">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-2">
+            <h2 className="text-xl sm:text-2xl font-bold">TOP CATEGORIES</h2>
             <Link
               href="/categories"
-              className="text-sm text-gray-600 hover:text-green-600 transition"
+              className="text-xs sm:text-sm text-gray-600 hover:text-green-600 transition"
             >
               View All
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
             {categories.map((category) => (
               <Link
                 key={category.slug}
                 href={`/products?category=${category.slug}`}
-                className="bg-white border rounded-lg p-6 flex flex-col items-center justify-center hover:shadow-lg transition group"
+                className="bg-white border rounded-lg p-4 sm:p-6 flex flex-col items-center justify-center hover:shadow-lg transition group"
               >
-                <div className="text-5xl mb-3 group-hover:scale-110 transition">
+                <div className="text-3xl sm:text-5xl mb-2 sm:mb-3 group-hover:scale-110 transition">
                   {category.icon}
                 </div>
-                <h3 className="font-semibold text-center text-sm">
+                <h3 className="font-semibold text-center text-xs sm:text-sm">
                   {category.name}
                 </h3>
               </Link>
