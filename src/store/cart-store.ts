@@ -17,6 +17,7 @@ interface CartStore {
   getTotal: () => number;
   getItemCount: () => number;
   getSubtotal: (item: CartItem) => number;
+  isInCart: (productId: string) => boolean;
 }
 
 export const useCartStore = create<CartStore>((set, get) => ({
@@ -49,6 +50,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
             : item
         )
       }));
+      toast.success('Item quantity updated in cart');
     } else {
       const newItem: CartItem = {
         id: `item_${Date.now()}`,
@@ -57,6 +59,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
         product
       };
       set(state => ({ items: [...state.items, newItem] }));
+      toast.success('Item added to cart');
     }
 
     set({ isLoading: true, error: null });
@@ -69,6 +72,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
       set({ items: previousItems, isLoading: false });
       const errorMessage = error instanceof Error ? error.message : 'Failed to add item';
       set({ error: errorMessage });
+      toast.error(errorMessage);
     }
   },
 
@@ -90,11 +94,13 @@ export const useCartStore = create<CartStore>((set, get) => ({
     try {
       await api.updateCartItem(id, quantity);
       await get().fetchCart();
+      toast.success('Quantity updated');
     } catch (error) {
       // Rollback on error
       set({ items: previousItems, isLoading: false });
       const errorMessage = error instanceof Error ? error.message : 'Failed to update quantity';
       set({ error: errorMessage });
+      toast.error(errorMessage);
     }
   },
 
@@ -109,11 +115,13 @@ export const useCartStore = create<CartStore>((set, get) => ({
     try {
       await api.removeFromCart(id);
       await get().fetchCart();
+      toast.success('Item removed from cart');
     } catch (error) {
       // Rollback on error
       set({ items: previousItems, isLoading: false });
       const errorMessage = error instanceof Error ? error.message : 'Failed to remove item';
       set({ error: errorMessage });
+      toast.error(errorMessage);
     }
   },
 
@@ -126,11 +134,13 @@ export const useCartStore = create<CartStore>((set, get) => ({
     try {
       await api.clearCart();
       set({ items: [], isLoading: false });
+      toast.success('Cart cleared');
     } catch (error) {
       // Rollback on error
       set({ items: previousItems, isLoading: false });
       const errorMessage = error instanceof Error ? error.message : 'Failed to clear cart';
       set({ error: errorMessage });
+      toast.error(errorMessage);
     }
   },
 
@@ -148,5 +158,10 @@ export const useCartStore = create<CartStore>((set, get) => ({
 
   getSubtotal: (item: CartItem) => {
     return item.product.price * item.quantity;
+  },
+
+  isInCart: (productId: string) => {
+    const { items } = get();
+    return items.some(item => item.productId === productId);
   }
 }));

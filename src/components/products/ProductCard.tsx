@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Heart, ShoppingCart, Eye, Loader } from "lucide-react";
+import { Heart, ShoppingCart, Eye, Loader, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Product } from "@/types";
@@ -23,10 +23,11 @@ export function ProductCard({ product, viewMode = "grid", compact = false }: Pro
   const isInStock = product.inventory > 0;
   
   const { isInWishlist, addToWishlist, removeFromWishlist, isLoading: isWishlistLoading } = useWishlistStore();
-  const { addItem, isLoading: isCartLoading } = useCartStore();
+  const { addItem, isInCart, isLoading: isCartLoading } = useCartStore();
   const [isCartAdding, setIsCartAdding] = useState(false);
 
   const isFavorited = isInWishlist(product.id);
+  const isItemInCart = isInCart(product.id);
 
   const handleWishlistToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -114,10 +115,14 @@ export function ProductCard({ product, viewMode = "grid", compact = false }: Pro
           <button 
             onClick={handleAddToCart}
             disabled={!isInStock || isCartAdding}
-            className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 disabled:opacity-50"
+            className={`w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-200 disabled:opacity-50 ${
+              isItemInCart ? 'bg-green-100' : 'bg-gray-100'
+            }`}
           >
             {isCartAdding ? (
               <Loader className="w-4 h-4 animate-spin" />
+            ) : isItemInCart ? (
+              <Check className="w-4 h-4 text-green-600" />
             ) : (
               <ShoppingCart className="w-4 h-4" />
             )}
@@ -236,13 +241,22 @@ export function ProductCard({ product, viewMode = "grid", compact = false }: Pro
           <Button
             onClick={handleAddToCart}
             disabled={isCartAdding}
-            className="w-full bg-green-600 hover:bg-green-700 text-white text-sm"
+            className={`w-full text-sm ${
+              isItemInCart 
+                ? 'bg-green-100 hover:bg-green-200 text-green-700 border border-green-300' 
+                : 'bg-green-600 hover:bg-green-700 text-white'
+            }`}
             size="sm"
           >
             {isCartAdding ? (
               <>
                 <Loader className="w-4 h-4 mr-2 animate-spin" />
                 Adding...
+              </>
+            ) : isItemInCart ? (
+              <>
+                <Check className="w-4 h-4 mr-2" />
+                Added to Cart
               </>
             ) : (
               <>

@@ -106,9 +106,21 @@ export default function CheckoutPage() {
 
     setIsProcessing(true);
     try {
+      // Generate order number
+      const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+
       const order = await api.createOrder({
+        orderNumber,
         total,
         status: "processing",
+        items: items.map(item => ({
+          productId: item.product.id,
+          productName: item.product.name,
+          quantity: item.quantity,
+          price: item.product.price,
+           image: item.product.images[0] || "/placeholder.png",
+        })),
+        createdAt: new Date().toISOString(),
       });
 
       await clearCart();
