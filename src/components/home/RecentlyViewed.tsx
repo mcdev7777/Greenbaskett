@@ -5,13 +5,33 @@ import { ProductCard } from "@/components/products/ProductCard";
 import { Product } from "@/types";
 import { useCartStore } from "@/store/cart-store";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
 
 interface RecentlyViewedProps {
-  products: Product[];
+  products?: Product[];
 }
 
-export function RecentlyViewed({ products }: RecentlyViewedProps) {
+export function RecentlyViewed({ products: initialProducts }: RecentlyViewedProps) {
   const { addItem } = useCartStore();
+  const [products, setProducts] = useState<Product[]>(initialProducts || []);
+  const [loading, setLoading] = useState(!initialProducts);
+
+  useEffect(() => {
+    if (!initialProducts) {
+      const fetchProducts = async () => {
+        try {
+          const data = await api.getProducts();
+          setProducts(data);
+        } catch (error) {
+          console.error('Failed to fetch products:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchProducts();
+    }
+  }, [initialProducts]);
 
   const handleAddToCart = async (product: Product) => {
     await addItem(product, 1);
@@ -43,13 +63,19 @@ export function RecentlyViewed({ products }: RecentlyViewedProps) {
 
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {products.slice(0, 4).map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onAddToCart={handleAddToCart}
-            />
-          ))}
+          {loading ? (
+            <p className="col-span-full text-center text-gray-600">Loading products...</p>
+          ) : products.length > 0 ? (
+            products.slice(0, 4).map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onAddToCart={handleAddToCart}
+              />
+            ))
+          ) : (
+            <p className="col-span-full text-center text-gray-600">No products available</p>
+          )}
         </div>
       </div>
     </section>

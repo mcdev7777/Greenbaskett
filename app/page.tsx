@@ -4,12 +4,8 @@ import { DealsOfTheDay } from "@/components/home/DealsOfTheDay";
 import { CategoryShowcase } from "@/components/home/CategoryShowCase";
 import { PromoBanner } from "@/components/home/PromoBanner";
 import { RecentlyViewed } from "@/components/home/RecentlyViewed";
-import { api } from "@/lib/api";
 
-export default async function Home() {
-  
-  const products = await api.getProducts();
-
+export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Hero />
@@ -17,7 +13,7 @@ export default async function Home() {
       <DealsOfTheDay />
       <CategoryShowcase />
       <PromoBanner />
-      <RecentlyViewed products={products} />
+      <RecentlyViewed />
     </div>
   );
 }
