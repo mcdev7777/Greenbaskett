@@ -1,20 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { ProductFilters } from "@/components/products/ProductFilters";
 import { ProductGrid } from "@/components/products/ProductGrid";
 import { Product } from "@/types";
 import { Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useProductFilters } from "@/lib/useProductFilters";
+import { searchProducts } from "@/lib/search";
 
 interface ProductsContentProps {
   products: Product[];
+  searchQuery?: string;
 }
 
-export function ProductsContent({ products }: ProductsContentProps) {
+export function ProductsContent({ products, searchQuery }: ProductsContentProps) {
   const [showFilters, setShowFilters] = useState(false);
   const { filteredProducts } = useProductFilters(products);
+
+  // Apply search on top of filtered products
+  const searchFilteredProducts = useMemo(() => {
+    if (!searchQuery) {
+      return filteredProducts;
+    }
+    return searchProducts(filteredProducts, searchQuery);
+  }, [filteredProducts, searchQuery]);
 
   return (
     <section className="container mx-auto px-4 py-8">
@@ -45,7 +55,10 @@ export function ProductsContent({ products }: ProductsContentProps) {
 
         {/* Product Grid */}
         <main className="lg:col-span-9">
-          <ProductGrid products={filteredProducts} />
+          <ProductGrid 
+            products={searchFilteredProducts} 
+            searchQuery={searchQuery}
+          />
         </main>
       </div>
     </section>

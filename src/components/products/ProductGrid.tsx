@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ProductCard } from "@/components/products/ProductCard";
 import { Product } from "@/types";
-import { Grid, List, ChevronDown } from "lucide-react";
+import { Grid, List, X } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Select,
   SelectContent,
@@ -15,13 +16,21 @@ import { Button } from "@/components/ui/button";
 
 interface ProductGridProps {
   products: Product[];
+  searchQuery?: string;
 }
 
-export function ProductGrid({ products }: ProductGridProps) {
+export function ProductGrid({ products, searchQuery }: ProductGridProps) {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [itemsPerPage, setItemsPerPage] = useState(24);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState("default");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Reset pagination when search or products change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, products.length]);
 
   // Calculate pagination
   const totalPages = Math.ceil(products.length / itemsPerPage);
@@ -48,41 +57,95 @@ export function ProductGrid({ products }: ProductGridProps) {
     return pages;
   };
 
+  const handleClearSearch = () => {
+    const params = new URLSearchParams(searchParams);
+    params.delete("search");
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
   return (
     <div className="space-y-6">
       {/* Empty State */}
       {products.length === 0 ? (
         <div className="bg-white rounded-lg p-12 text-center">
-          <h3 className="text-xl font-bold text-gray-900 mb-2">No products found</h3>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">
+            {searchQuery ? `No results for "${searchQuery}"` : "No products found"}
+          </h3>
           <p className="text-gray-600 mb-6">
-            Try adjusting your filters or search criteria to find what you're looking for.
+            {searchQuery
+              ? "Try different search terms or adjust your filters."
+              : "Try adjusting your filters or search criteria to find what you're looking for."}
           </p>
-          <Button className="bg-green-600 hover:bg-green-700">Clear Filters</Button>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            {searchQuery && (
+              <Button 
+                onClick={handleClearSearch}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <X className="w-4 h-4 mr-2" />
+                Clear Search
+              </Button>
+            )}
+            <Button 
+              onClick={() => router.push("/products")}
+              variant="outline"
+            >
+              View All Products
+            </Button>
+          </div>
         </div>
       ) : (
         <>
-          {/* Header Section - Only show if products exist */}
-          <div className="bg-white rounded-lg p-4 md:p-6">
-            <h2 className="text-xl md:text-2xl font-bold mb-4">BEST SELLER IN THIS CATEGORY</h2>
-
-            {/* Featured Products - Horizontal Scroll on Mobile */}
-            <div className="overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0">
-              <div className="flex md:grid md:grid-cols-4 gap-4 min-w-max md:min-w-0">
-                {products.slice(0, 4).map((product) => (
-                  <div key={product.id} className="w-64 md:w-auto">
-                    <ProductCard product={product} compact />
-                  </div>
-                ))}
+          {/* Search Header - Only show if searching */}
+          {searchQuery && (
+            <div className="bg-white rounded-lg p-4 md:p-6 border-l-4 border-green-600">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h2 className="text-lg md:text-xl font-bold text-gray-900">
+                    Showing results for: <span className="text-green-600">"{searchQuery}"</span>
+                  </h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Found {products.length} {products.length === 1 ? "product" : "products"}
+                  </p>
+                </div>
+                <Button
+                  onClick={handleClearSearch}
+                  variant="outline"
+                  className="sm:w-auto"
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Clear Search
+                </Button>
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Header Section - Only show if products exist and not searching */}
+          {!searchQuery && (
+            <div className="bg-white rounded-lg p-4 md:p-6">
+              <h2 className="text-xl md:text-2xl font-bold mb-4">BEST SELLER IN THIS CATEGORY</h2>
+
+              {/* Featured Products - Horizontal Scroll on Mobile */}
+              <div className="overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0">
+                <div className="flex md:grid md:grid-cols-4 gap-4 min-w-max md:min-w-0">
+                  {products.slice(0, 4).map((product) => (
+                    <div key={product.id} className="w-64 md:w-auto">
+                      <ProductCard product={product} compact />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Controls Bar */}
           <div className="bg-white rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
             {/* Results Count */}
             <div className="text-sm text-gray-600">
-              <span className="font-semibold">1 - {Math.min(itemsPerPage, products.length)}</span> of{" "}
-              <span className="font-semibold">{products.length}</span> results
+              <span className="font-semibold">
+                {products.length === 0 ? 0 : startIndex + 1} - {Math.min(endIndex, products.length)}
+              </span>{" "}
+              of <span className="font-semibold">{products.length}</span> results
             </div>
 
             {/* Controls */}

@@ -1,6 +1,7 @@
 import { ProductsHero } from "./ProductsHero";
 import { PopularCategories } from "./PopularCategories";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { ProductsContent } from "./ProductsContent";
 import { api } from "@/lib/api";
 
 export default async function ProductsPage({
@@ -24,10 +25,11 @@ export default async function ProductsPage({
       {/* Hero Banners */}
       <ProductsHero />
 
-      {/* Popular Categories */}
-      <PopularCategories />
+      {/* Popular Categories - Only show if not searching */}
+      {!searchParams.search && <PopularCategories />}
 
       {/* Main Products Content (Filters + Grid) */}
+      <ProductsContent products={products} searchQuery={searchParams.search} />
     </div>
   );
 }
