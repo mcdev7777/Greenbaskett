@@ -2,26 +2,27 @@ import { Product, CartItem, Order } from '@/types';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 
-// Transform Supabase product to our Product type
+
 const transformSupabaseProduct = (data: any): Product => ({
   id: data.id,
   name: data.name,
   slug: data.slug,
   description: data.description || '',
   price: Number(data.price),
-  compareAtPrice: data.compare_at_price ? Number(data.compare_at_price) : undefined,
+  compareAtPrice: data.compare_at_price ? Number(data.compare_at_price) : null,
   images: data.images || [],
   category: data.category || '',
   brand: data.brand,
   rating: data.rating,
   color: data.color,
   condition: data.condition,
+  screenSize: data.screen_size || '',
+  memory: data.memory || 'N/A',
   inventory: data.inventory || 0,
   isActive: true,
 });
 
 export const api = {
-  // ============ PRODUCTS ============
   getProducts: async (): Promise<Product[]> => {
     try {
       const { data, error } = await supabase
