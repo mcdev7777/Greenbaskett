@@ -403,30 +403,11 @@
   ],
   "cart": [
     {
-      "id": "173e",
-      "productId": "3",
-      "quantity": 8,
-      "product": {
-        "id": "3",
-        "name": "Running Shoes",
-        "slug": "running-shoes",
-        "description": "Lightweight running shoes with advanced cushioning technology",
-        "price": 129.99,
-        "compareAtPrice": 159.99,
-        "images": [
-          "/images/shoes.jpg"
-        ],
-        "category": "Fashion",
-        "inventory": 100,
-        "isActive": true
-      }
-    },
-    {
-      "id": "6996",
-      "productId": "2",
+      "id": "25e8",
+      "productId": "17",
       "quantity": 1,
       "product": {
-        "id": "2",
+        "id": "17",
         "name": "Smart Watch",
         "slug": "smart-watch",
         "description": "Fitness tracking smartwatch with heart rate monitor and GPS",
@@ -436,26 +417,13 @@
           "/images/watch.jpg"
         ],
         "category": "Electronics",
+        "brand": "Garmin",
+        "rating": 4.4,
+        "screenSize": "N/A",
+        "color": "gray",
+        "memory": "32GB",
+        "condition": "New",
         "inventory": 30,
-        "isActive": true
-      }
-    },
-    {
-      "id": "6ecb",
-      "productId": "1",
-      "quantity": 1,
-      "product": {
-        "id": "1",
-        "name": "Wireless Headphones",
-        "slug": "wireless-headphones",
-        "description": "Premium noise-cancelling wireless headphones with 30-hour battery life",
-        "price": 299.99,
-        "compareAtPrice": 399.99,
-        "images": [
-          "/images/headphones.jpg"
-        ],
-        "category": "Electronics",
-        "inventory": 50,
         "isActive": true
       }
     }

@@ -3,12 +3,17 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, Package, Truck, CheckCircle, XCircle } from "lucide-react";
+import { ChevronRight, Package, Truck, CheckCircle, XCircle, Eye, EyeOff } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { FormError } from "@/components/ui/FormError";
 import { formatPrice } from "@/lib/utils";
+import { profileSchema, passwordChangeSchema, type ProfileFormData, type PasswordChangeFormData } from "@/lib/validations";
 
 // Mock orders data
 const mockOrders = [
@@ -90,16 +95,64 @@ const mockOrders = [
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<"account" | "orders" | "address" | "password">("account");
-  const [formData, setFormData] = useState({
-    firstName: "Mark",
-    lastName: "Cole",
-    email: "swoo@gmail.com",
-    phone: "+1 0231 4554 452",
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
+  const [isLoadingPassword, setIsLoadingPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const {
+    register: registerProfile,
+    handleSubmit: handleSubmitProfile,
+    formState: { errors: errorsProfile },
+  } = useForm<ProfileFormData>({
+    resolver: zodResolver(profileSchema),
+    mode: "onBlur",
+    defaultValues: {
+      firstName: "Mark",
+      lastName: "Cole",
+      email: "swoo@gmail.com",
+      phone: "+1 0231 4554 452",
+    },
   });
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Save profile:", formData);
+  const {
+    register: registerPassword,
+    handleSubmit: handleSubmitPassword,
+    formState: { errors: errorsPassword },
+    reset: resetPassword,
+  } = useForm<PasswordChangeFormData>({
+    resolver: zodResolver(passwordChangeSchema),
+    mode: "onBlur",
+  });
+
+  const onSubmitProfile = async (data: ProfileFormData) => {
+    try {
+      setIsLoadingProfile(true);
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.success("Profile updated successfully!");
+      console.log("Save profile:", data);
+    } catch (error) {
+      toast.error("Failed to update profile. Please try again.");
+    } finally {
+      setIsLoadingProfile(false);
+    }
+  };
+
+  const onSubmitPassword = async (data: PasswordChangeFormData) => {
+    try {
+      setIsLoadingPassword(true);
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.success("Password changed successfully!");
+      resetPassword();
+      console.log("Password changed");
+    } catch (error) {
+      toast.error("Failed to change password. Please try again.");
+    } finally {
+      setIsLoadingPassword(false);
+    }
   };
 
   const getStatusIcon = (status: string) => {
@@ -216,7 +269,7 @@ export default function ProfilePage() {
               {activeTab === "account" && (
                 <>
                   <h2 className="text-2xl font-bold mb-8">Account Info</h2>
-                  <form onSubmit={handleSave} className="space-y-6">
+                  <form onSubmit={handleSubmitProfile(onSubmitProfile)} className="space-y-6">
                     {/* Name Fields */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
@@ -225,13 +278,12 @@ export default function ProfilePage() {
                         </label>
                         <Input
                           type="text"
-                          value={formData.firstName}
-                          onChange={(e) =>
-                            setFormData({ ...formData, firstName: e.target.value })
-                          }
-                          required
-                          className="h-12"
+                          {...registerProfile("firstName")}
+                          className={`h-12 ${
+                            errorsProfile.firstName ? "border-red-500" : ""
+                          }`}
                         />
+                        <FormError error={errorsProfile.firstName} />
                       </div>
 
                       <div>
@@ -240,13 +292,12 @@ export default function ProfilePage() {
                         </label>
                         <Input
                           type="text"
-                          value={formData.lastName}
-                          onChange={(e) =>
-                            setFormData({ ...formData, lastName: e.target.value })
-                          }
-                          required
-                          className="h-12"
+                          {...registerProfile("lastName")}
+                          className={`h-12 ${
+                            errorsProfile.lastName ? "border-red-500" : ""
+                          }`}
                         />
+                        <FormError error={errorsProfile.lastName} />
                       </div>
                     </div>
 
@@ -257,36 +308,36 @@ export default function ProfilePage() {
                       </label>
                       <Input
                         type="email"
-                        value={formData.email}
-                        onChange={(e) =>
-                          setFormData({ ...formData, email: e.target.value })
-                        }
-                        required
-                        className="h-12"
+                        {...registerProfile("email")}
+                        className={`h-12 ${
+                          errorsProfile.email ? "border-red-500" : ""
+                        }`}
                       />
+                      <FormError error={errorsProfile.email} />
                     </div>
 
                     {/* Phone */}
                     <div>
                       <label className="block text-sm font-semibold mb-2">
-                        Phone Number <span className="text-gray-500">(Optional)</span>
+                        Phone Number <span className="text-red-600">*</span>
                       </label>
                       <Input
                         type="tel"
-                        value={formData.phone}
-                        onChange={(e) =>
-                          setFormData({ ...formData, phone: e.target.value })
-                        }
-                        className="h-12"
+                        {...registerProfile("phone")}
+                        className={`h-12 ${
+                          errorsProfile.phone ? "border-red-500" : ""
+                        }`}
                       />
+                      <FormError error={errorsProfile.phone} />
                     </div>
 
                     {/* Save Button */}
                     <Button
                       type="submit"
-                      className="bg-green-600 hover:bg-green-700 text-white px-12 h-12"
+                      disabled={isLoadingProfile}
+                      className="bg-green-600 hover:bg-green-700 text-white px-12 h-12 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      SAVE
+                      {isLoadingProfile ? "SAVING..." : "SAVE"}
                     </Button>
                   </form>
                 </>
@@ -411,27 +462,94 @@ export default function ProfilePage() {
               {activeTab === "password" && (
                 <div>
                   <h2 className="text-2xl font-bold mb-8">Change Password</h2>
-                  <form className="space-y-6 max-w-xl">
+                  <form onSubmit={handleSubmitPassword(onSubmitPassword)} className="space-y-6 max-w-xl">
                     <div>
                       <label className="block text-sm font-semibold mb-2">
                         Current Password
                       </label>
-                      <Input type="password" className="h-12" />
+                      <div className="relative">
+                        <Input
+                          type={showCurrentPassword ? "text" : "password"}
+                          {...registerPassword("currentPassword")}
+                          className={`h-12 pr-12 ${
+                            errorsPassword.currentPassword ? "border-red-500" : ""
+                          }`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                          {showCurrentPassword ? (
+                            <EyeOff className="w-5 h-5" />
+                          ) : (
+                            <Eye className="w-5 h-5" />
+                          )}
+                        </button>
+                      </div>
+                      <FormError error={errorsPassword.currentPassword} />
                     </div>
+
                     <div>
                       <label className="block text-sm font-semibold mb-2">
                         New Password
                       </label>
-                      <Input type="password" className="h-12" />
+                      <div className="relative">
+                        <Input
+                          type={showNewPassword ? "text" : "password"}
+                          {...registerPassword("newPassword")}
+                          className={`h-12 pr-12 ${
+                            errorsPassword.newPassword ? "border-red-500" : ""
+                          }`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                          {showNewPassword ? (
+                            <EyeOff className="w-5 h-5" />
+                          ) : (
+                            <Eye className="w-5 h-5" />
+                          )}
+                        </button>
+                      </div>
+                      <FormError error={errorsPassword.newPassword} />
                     </div>
+
                     <div>
                       <label className="block text-sm font-semibold mb-2">
                         Confirm New Password
                       </label>
-                      <Input type="password" className="h-12" />
+                      <div className="relative">
+                        <Input
+                          type={showConfirmPassword ? "text" : "password"}
+                          {...registerPassword("confirmPassword")}
+                          className={`h-12 pr-12 ${
+                            errorsPassword.confirmPassword ? "border-red-500" : ""
+                          }`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                          {showConfirmPassword ? (
+                            <EyeOff className="w-5 h-5" />
+                          ) : (
+                            <Eye className="w-5 h-5" />
+                          )}
+                        </button>
+                      </div>
+                      <FormError error={errorsPassword.confirmPassword} />
                     </div>
-                    <Button className="bg-green-600 hover:bg-green-700 text-white px-12 h-12">
-                      UPDATE PASSWORD
+
+                    <Button
+                      type="submit"
+                      disabled={isLoadingPassword}
+                      className="bg-green-600 hover:bg-green-700 text-white px-12 h-12 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isLoadingPassword ? "UPDATING..." : "UPDATE PASSWORD"}
                     </Button>
                   </form>
                 </div>

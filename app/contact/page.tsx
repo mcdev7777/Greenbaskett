@@ -3,10 +3,14 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { FormError } from "@/components/ui/FormError";
 import {
   Select,
   SelectContent,
@@ -14,22 +18,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { contactSchema, type ContactFormData } from "@/lib/validations";
 
 export default function ContactPage() {
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    country: "us",
-    subject: "",
-    message: "",
-    agreeToTerms: false,
+  const [isLoading, setIsLoading] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<ContactFormData>({
+    resolver: zodResolver(contactSchema),
+    mode: "onBlur",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Contact form submitted:", formData);
+  const handleSubmit2 = async (data: ContactFormData) => {
+    try {
+      setIsLoading(true);
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.success("Message sent successfully! We'll get back to you soon.");
+      console.log("Contact form submitted:", data);
+    } catch (error) {
+      toast.error("Failed to send message. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -54,7 +68,7 @@ export default function ContactPage() {
                 Contact us for all your questions and opinions
               </p>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit(handleSubmit2)} className="space-y-6">
                 {/* Name Fields */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -63,13 +77,12 @@ export default function ContactPage() {
                     </label>
                     <Input
                       type="text"
-                      value={formData.firstName}
-                      onChange={(e) =>
-                        setFormData({ ...formData, firstName: e.target.value })
-                      }
-                      required
-                      className="h-12"
+                      {...register("firstName")}
+                      className={`h-12 ${
+                        errors.firstName ? "border-red-500" : ""
+                      }`}
                     />
+                    <FormError error={errors.firstName} />
                   </div>
 
                   <div>
@@ -78,13 +91,12 @@ export default function ContactPage() {
                     </label>
                     <Input
                       type="text"
-                      value={formData.lastName}
-                      onChange={(e) =>
-                        setFormData({ ...formData, lastName: e.target.value })
-                      }
-                      required
-                      className="h-12"
+                      {...register("lastName")}
+                      className={`h-12 ${
+                        errors.lastName ? "border-red-500" : ""
+                      }`}
                     />
+                    <FormError error={errors.lastName} />
                   </div>
                 </div>
 
@@ -95,13 +107,12 @@ export default function ContactPage() {
                   </label>
                   <Input
                     type="email"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                    required
-                    className="h-12"
+                    {...register("email")}
+                    className={`h-12 ${
+                      errors.email ? "border-red-500" : ""
+                    }`}
                   />
+                  <FormError error={errors.email} />
                 </div>
 
                 {/* Phone */}
@@ -111,50 +122,12 @@ export default function ContactPage() {
                   </label>
                   <Input
                     type="tel"
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    className="h-12"
+                    {...register("phone")}
+                    className={`h-12 ${
+                      errors.phone ? "border-red-500" : ""
+                    }`}
                   />
-                </div>
-
-                {/* Country */}
-                <div>
-                  <label className="block text-sm font-semibold mb-2">
-                    Country / Region <span className="text-red-600">*</span>
-                  </label>
-                  <Select
-                    value={formData.country}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, country: value })
-                    }
-                  >
-                    <SelectTrigger className="h-12">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="us">United States (US)</SelectItem>
-                      <SelectItem value="uk">United Kingdom</SelectItem>
-                      <SelectItem value="ca">Canada</SelectItem>
-                      <SelectItem value="ke">Kenya</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Subject */}
-                <div>
-                  <label className="block text-sm font-semibold mb-2">
-                    Subject <span className="text-gray-500">(Optional)</span>
-                  </label>
-                  <Input
-                    type="text"
-                    value={formData.subject}
-                    onChange={(e) =>
-                      setFormData({ ...formData, subject: e.target.value })
-                    }
-                    className="h-12"
-                  />
+                  <FormError error={errors.phone} />
                 </div>
 
                 {/* Message */}
@@ -163,39 +136,22 @@ export default function ContactPage() {
                     Message
                   </label>
                   <textarea
-                    value={formData.message}
-                    onChange={(e) =>
-                      setFormData({ ...formData, message: e.target.value })
-                    }
+                    {...register("message")}
                     placeholder="Note about your order, e.g. special note for delivery"
-                    className="w-full border rounded-lg p-3 min-h-[150px] text-sm"
+                    className={`w-full border rounded-lg p-3 min-h-[150px] text-sm ${
+                      errors.message ? "border-red-500" : ""
+                    }`}
                   />
-                </div>
-
-                {/* Terms Checkbox */}
-                <div className="flex items-start gap-2">
-                  <Checkbox
-                    id="terms"
-                    checked={formData.agreeToTerms}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, agreeToTerms: checked as boolean })
-                    }
-                  />
-                  <label htmlFor="terms" className="text-sm cursor-pointer">
-                    I want to receive news and updates once in a while. By submitting,
-                    I'm agreed to the{" "}
-                    <Link href="/terms" className="text-green-600 underline">
-                      Terms & Conditions
-                    </Link>
-                  </label>
+                  <FormError error={errors.message} />
                 </div>
 
                 {/* Submit Button */}
                 <Button
                   type="submit"
-                  className="bg-green-600 hover:bg-green-700 text-white h-12 px-8"
+                  disabled={isLoading}
+                  className="bg-green-600 hover:bg-green-700 text-white h-12 px-8 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  SEND MESSAGE
+                  {isLoading ? "SENDING..." : "SEND MESSAGE"}
                 </Button>
               </form>
             </div>
