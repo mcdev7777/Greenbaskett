@@ -22,7 +22,7 @@ const categories = [
 
 const heroImages = {
   headphones: "https://i.pinimg.com/736x/e9/bc/01/e9bc01c2d889ce6b37cd9a3e4a8e7ec2.jpg",
-  watch: "https://i.pinimg.com/1200x/07/dc/d4/07dcd45cd41417dde08fed1772fe708f.jpg",
+  watch: "https://i.pinimg.com/736x/eb/e3/e0/ebe3e0cbf1082b9bcf71b779fb1a2109.jpg",
   camera: "https://i.pinimg.com/736x/6f/74/fe/6f74feebc0f2aac1d134cedb6a223db2.jpg",
   keyboard: "https://i.pinimg.com/1200x/6d/e9/7d/6de97d26943513b8381565c973064cf5.jpg",
   playstation: "https://i.pinimg.com/1200x/6c/a3/ab/6ca3ab3952212fa9e9367f08d2d5ec12.jpg",
@@ -62,7 +62,7 @@ export function Hero() {
         {/* Main Hero Section */}
         <div className="col-span-1 lg:col-span-7 order-1 lg:order-2">
           {/* Main Hero Banner */}
-          <div className="relative bg-gradient-to-br from-gray-400 to-gray-500 rounded-lg overflow-hidden h-[300px] sm:h-[400px] mb-4 sm:mb-6">
+          <div className="relative bg-gradient-to-br from-gray-400 to-gray-800 rounded-lg overflow-hidden h-[300px] sm:h-[400px] mb-4 sm:mb-6">
             {/* Background Image */}
             <Image
               src={heroImages.headphones}
@@ -142,7 +142,7 @@ export function Hero() {
               src={heroImages.watch}
               alt="Sport Water Resistance Watch"
               fill
-              className="object-cover opacity-60"
+              className="object-cover opacity-70"
             />
             <div className="relative z-10">
               <p className="text-xs sm:text-sm text-gray-600 mb-2">XOMIA</p>

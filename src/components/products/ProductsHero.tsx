@@ -11,7 +11,7 @@ export function ProductsHero() {
         {/* Headphones Banner */}
         <div className="relative bg-gradient-to-br from-gray-400 to-gray-500 rounded-lg overflow-hidden h-64 md:h-80">
           <Image
-            src="https://i.pinimg.com/564x/YOUR_HEADPHONE.jpg"
+            src="https://i.pinimg.com/1200x/c9/c0/33/c9c033ac051bd4ee86797d1bfc151331.jpg"
             alt="Noise Cancelling Headphone"
             fill
             className="object-cover"
@@ -40,7 +40,7 @@ export function ProductsHero() {
         {/* Phone Banner */}
         <div className="relative bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg overflow-hidden h-64 md:h-80">
           <Image
-            src="https://i.pinimg.com/564x/YOUR_PHONE.jpg"
+            src="https://i.pinimg.com/1200x/74/c3/f6/74c3f6735b78dc2c933005555526ae67.jpg"
             alt="redmi note 12 Pro+ 5g"
             fill
             className="object-contain"

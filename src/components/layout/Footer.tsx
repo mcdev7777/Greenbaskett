@@ -219,7 +219,7 @@ export function Footer() {
 
           {/* Copyright */}
           <div className="text-xs sm:text-sm text-gray-600 order-3 sm:order-2">
-            © 2024 <span className="font-bold">Shawonetc3</span>. All Rights Reserved
+            © 2025 <span className="font-bold">Swoo Tech Mart</span>. All Rights Reserved
           </div>
 
           {/* Payment Methods */}
