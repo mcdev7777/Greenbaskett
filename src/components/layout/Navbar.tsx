@@ -3,23 +3,74 @@
 import Link from "next/link";
 import { Search, Heart, ShoppingCart, User, Phone, ChevronDown } from "lucide-react";
 import { useCartStore } from "@/store/cart-store";
-import { useEffect, useState } from "react";
+import { useWishlistStore } from "@/store/wishlist-store";
+import { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { formatPrice } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { api } from "@/lib/api";
+import { SearchSuggestions } from "./SearchSuggestions";
+import { Product } from "@/types";
 
 export function Navbar() {
   const { items, getTotal, getItemCount, fetchCart } = useCartStore();
+  const { getItemCount: getWishlistItemCount, fetchWishlist } = useWishlistStore();
   const [mounted, setMounted] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const router = useRouter();
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
     fetchCart();
-  }, [fetchCart]);
+    fetchWishlist();
+    // Load products for search suggestions
+    api.getProducts().then(setProducts);
+  }, [fetchCart, fetchWishlist]);
+
+  const handleSearch = (e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      const searchTerm = searchQuery.trim();
+      // Save to recent searches
+      const stored = localStorage.getItem("recentSearches");
+      const recent = stored ? JSON.parse(stored) : [];
+      const updated = [searchTerm, ...recent.filter((s: string) => s !== searchTerm)].slice(0, 5);
+      localStorage.setItem("recentSearches", JSON.stringify(updated));
+      
+      router.push(`/products?search=${encodeURIComponent(searchTerm)}`);
+      setSearchQuery("");
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleSuggestionSelect = (term: string) => {
+    setSearchQuery(term);
+    router.push(`/products?search=${encodeURIComponent(term)}`);
+    setSearchQuery("");
+    setShowSuggestions(false);
+  };
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const itemCount = mounted ? getItemCount() : 0;
   const total = mounted ? getTotal() : 0;
+  const wishlistCount = mounted ? getWishlistItemCount() : 0;
 
   return (
     <header className="w-full border-b">
@@ -98,9 +149,14 @@ export function Navbar() {
               <button className="hover:text-green-600 transition">
                 <Search className="w-5 h-5" />
               </button>
-              <button className="hover:text-green-600 transition">
+              <Link href="/wishlist" className="relative hover:text-green-600 transition">
                 <Heart className="w-5 h-5" />
-              </button>
+                {wishlistCount > 0 && (
+                  <Badge className="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center p-0 bg-red-600 hover:bg-red-600 text-white text-xs">
+                    {wishlistCount}
+                  </Badge>
+                )}
+              </Link>
               
               <div className="hidden lg:flex flex-col items-end">
                 <span className="text-xs text-gray-500">WELCOME</span>
@@ -133,22 +189,48 @@ export function Navbar() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16 gap-6">
             {/* Search */}
-            <div className="flex-1 max-w-2xl flex items-center bg-white rounded-sm overflow-hidden">
-              <select className="px-4 py-3 bg-white border-r text-sm font-medium outline-none cursor-pointer">
-                <option>All Categories</option>
-                <option>Electronics</option>
-                <option>Fashion</option>
-                <option>Home</option>
-                <option>Sports</option>
-              </select>
-              <input
-                type="text"
-                placeholder="Search anything..."
-                className="flex-1 px-4 py-3 outline-none text-sm"
+            <div 
+              ref={searchContainerRef}
+              className="flex-1 max-w-2xl relative"
+            >
+              <form 
+                onSubmit={handleSearch}
+                className="flex items-center bg-white rounded-sm overflow-hidden"
+              >
+                <select className="px-4 py-3 bg-white border-r text-sm font-medium outline-none cursor-pointer">
+                  <option>All Categories</option>
+                  <option>Electronics</option>
+                  <option>Fashion</option>
+                  <option>Home</option>
+                  <option>Sports</option>
+                </select>
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Search anything..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setShowSuggestions(true);
+                  }}
+                  onFocus={() => setShowSuggestions(true)}
+                  className="flex-1 px-4 py-3 outline-none text-sm"
+                />
+                <button 
+                  type="submit"
+                  className="px-6 py-3 bg-green-600 text-white hover:bg-green-700 transition flex items-center justify-center"
+                >
+                  <Search className="w-5 h-5" />
+                </button>
+              </form>
+              
+              {/* Search Suggestions Dropdown */}
+              <SearchSuggestions
+                products={products}
+                isOpen={showSuggestions}
+                query={searchQuery}
+                onSelect={handleSuggestionSelect}
               />
-              <button className="px-6 py-3 bg-green-600 text-white hover:bg-green-700 transition">
-                <Search className="w-5 h-5" />
-              </button>
             </div>
 
             {/* Promotional Info */}

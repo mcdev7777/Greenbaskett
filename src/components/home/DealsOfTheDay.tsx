@@ -204,7 +204,7 @@ export function DealsOfTheDay() {
                 src={dealImages.gameController}
                 alt="Gaming Controller Sale"
                 fill
-                className="object-cover opacity-30"
+                className="object-cover opacity-70"
               />
               <Badge className="absolute top-2 sm:top-4 right-2 sm:right-4 z-10 bg-yellow-400 text-black hover:bg-yellow-400 font-bold text-xs sm:text-base">
                 50%
@@ -222,7 +222,7 @@ export function DealsOfTheDay() {
                 src={dealImages.tablet}
                 alt="Tablets"
                 fill
-                className="object-cover opacity-40"
+                className="object-cover opacity-90"
               />
               <div className="relative z-10">
                 <div className="text-white font-bold text-lg sm:text-xl">Tablets</div>
