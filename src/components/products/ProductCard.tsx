@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Heart, ShoppingCart, Eye } from "lucide-react";
@@ -5,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Product } from "@/types";
 import { formatPrice } from "@/lib/utils";
+import { useWishlistStore } from "@/store/wishlist-store";
+import { useState } from "react";
 
 interface ProductCardProps {
   product: Product;
@@ -17,6 +21,24 @@ export function ProductCard({ product, onAddToCart, viewMode = "grid", compact =
   const hasDiscount = product.compareAtPrice && product.compareAtPrice > product.price;
   const discountAmount = hasDiscount ? product.compareAtPrice! - product.price : 0;
   const isInStock = product.inventory > 0;
+  const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlistStore();
+  const [isWishlistLoading, setIsWishlistLoading] = useState(false);
+
+  const isFavorited = isInWishlist(product.id);
+
+  const handleWishlistToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsWishlistLoading(true);
+    try {
+      if (isFavorited) {
+        await removeFromWishlist(product.id);
+      } else {
+        await addToWishlist(product);
+      }
+    } finally {
+      setIsWishlistLoading(false);
+    }
+  };
 
   if (viewMode === "list") {
     return (
@@ -63,8 +85,16 @@ export function ProductCard({ product, onAddToCart, viewMode = "grid", compact =
 
         {/* Actions */}
         <div className="flex flex-col gap-2">
-          <button className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200">
-            <Heart className="w-4 h-4" />
+          <button 
+            onClick={handleWishlistToggle}
+            disabled={isWishlistLoading}
+            className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 disabled:opacity-50"
+          >
+            <Heart 
+              className="w-4 h-4" 
+              fill={isFavorited ? "currentColor" : "none"}
+              color={isFavorited ? "red" : "currentColor"}
+            />
           </button>
           <button className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200">
             <Eye className="w-4 h-4" />
@@ -93,8 +123,16 @@ export function ProductCard({ product, onAddToCart, viewMode = "grid", compact =
 
       {/* Action Buttons */}
       <div className="absolute top-4 right-4 z-10 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition">
-        <button className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-100">
-          <Heart className="w-4 h-4" />
+        <button 
+          onClick={handleWishlistToggle}
+          disabled={isWishlistLoading}
+          className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-100 disabled:opacity-50"
+        >
+          <Heart 
+            className="w-4 h-4" 
+            fill={isFavorited ? "currentColor" : "none"}
+            color={isFavorited ? "red" : "currentColor"}
+          />
         </button>
         <button className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-100">
           <Eye className="w-4 h-4" />

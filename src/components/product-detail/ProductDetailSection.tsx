@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Heart, Minus, Plus } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import { useCartStore } from "@/store/cart-store";
+import { useWishlistStore } from "@/store/wishlist-store";
 import { BrandCard } from "./BrandCard";
 import { MiniCart } from "./MiniCart";
 
@@ -18,7 +19,11 @@ interface ProductDetailSectionProps {
 export function ProductDetailSection({ product }: ProductDetailSectionProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [isWishlistLoading, setIsWishlistLoading] = useState(false);
   const { addItem } = useCartStore();
+  const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlistStore();
+
+  const isFavorited = isInWishlist(product.id);
 
   const hasDiscount = product.compareAtPrice && product.compareAtPrice > product.price;
   const isInStock = product.inventory > 0;
@@ -36,6 +41,19 @@ export function ProductDetailSection({ product }: ProductDetailSectionProps) {
   const decrementQuantity = () => {
     if (quantity > 1) {
       setQuantity(quantity - 1);
+    }
+  };
+
+  const handleWishlistToggle = async () => {
+    setIsWishlistLoading(true);
+    try {
+      if (isFavorited) {
+        await removeFromWishlist(product.id);
+      } else {
+        await addToWishlist(product);
+      }
+    } finally {
+      setIsWishlistLoading(false);
     }
   };
 
@@ -178,8 +196,16 @@ export function ProductDetailSection({ product }: ProductDetailSectionProps) {
                     ADD TO CART
                   </Button>
 
-                  <button className="p-3 border rounded-lg hover:bg-gray-100">
-                    <Heart className="w-5 h-5" />
+                  <button 
+                    onClick={handleWishlistToggle}
+                    disabled={isWishlistLoading}
+                    className="p-3 border rounded-lg hover:bg-gray-100 disabled:opacity-50"
+                  >
+                    <Heart 
+                      className="w-5 h-5" 
+                      fill={isFavorited ? "currentColor" : "none"}
+                      color={isFavorited ? "red" : "currentColor"}
+                    />
                   </button>
                 </div>
               </div>

@@ -109,6 +109,63 @@
         "inventory": 30,
         "isActive": true
       }
+    },
+    {
+      "id": "6ecb",
+      "productId": "1",
+      "quantity": 1,
+      "product": {
+        "id": "1",
+        "name": "Wireless Headphones",
+        "slug": "wireless-headphones",
+        "description": "Premium noise-cancelling wireless headphones with 30-hour battery life",
+        "price": 299.99,
+        "compareAtPrice": 399.99,
+        "images": [
+          "/images/headphones.jpg"
+        ],
+        "category": "Electronics",
+        "inventory": 50,
+        "isActive": true
+      }
+    }
+  ],
+  "wishlist": [
+    {
+      "id": "f92f",
+      "productId": "1",
+      "product": {
+        "id": "1",
+        "name": "Wireless Headphones",
+        "slug": "wireless-headphones",
+        "description": "Premium noise-cancelling wireless headphones with 30-hour battery life",
+        "price": 299.99,
+        "compareAtPrice": 399.99,
+        "images": [
+          "/images/headphones.jpg"
+        ],
+        "category": "Electronics",
+        "inventory": 50,
+        "isActive": true
+      }
+    },
+    {
+      "id": "5cf8",
+      "productId": "2",
+      "product": {
+        "id": "2",
+        "name": "Smart Watch",
+        "slug": "smart-watch",
+        "description": "Fitness tracking smartwatch with heart rate monitor and GPS",
+        "price": 249.99,
+        "compareAtPrice": null,
+        "images": [
+          "/images/watch.jpg"
+        ],
+        "category": "Electronics",
+        "inventory": 30,
+        "isActive": true
+      }
     }
   ],
   "orders": []

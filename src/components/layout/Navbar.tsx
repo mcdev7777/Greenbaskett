@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Search, Heart, ShoppingCart, User, Phone, ChevronDown } from "lucide-react";
 import { useCartStore } from "@/store/cart-store";
+import { useWishlistStore } from "@/store/wishlist-store";
 import { useEffect, useState } from "react";
 import { formatPrice } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -11,15 +12,18 @@ import { Badge } from "@/components/ui/badge";
 
 export function Navbar() {
   const { items, getTotal, getItemCount, fetchCart } = useCartStore();
+  const { getItemCount: getWishlistItemCount, fetchWishlist } = useWishlistStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     fetchCart();
-  }, [fetchCart]);
+    fetchWishlist();
+  }, [fetchCart, fetchWishlist]);
 
   const itemCount = mounted ? getItemCount() : 0;
   const total = mounted ? getTotal() : 0;
+  const wishlistCount = mounted ? getWishlistItemCount() : 0;
 
   return (
     <header className="w-full border-b">
@@ -98,9 +102,14 @@ export function Navbar() {
               <button className="hover:text-green-600 transition">
                 <Search className="w-5 h-5" />
               </button>
-              <button className="hover:text-green-600 transition">
+              <Link href="/wishlist" className="relative hover:text-green-600 transition">
                 <Heart className="w-5 h-5" />
-              </button>
+                {wishlistCount > 0 && (
+                  <Badge className="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center p-0 bg-red-600 hover:bg-red-600 text-white text-xs">
+                    {wishlistCount}
+                  </Badge>
+                )}
+              </Link>
               
               <div className="hidden lg:flex flex-col items-end">
                 <span className="text-xs text-gray-500">WELCOME</span>
