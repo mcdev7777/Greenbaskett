@@ -426,6 +426,56 @@
         "inventory": 30,
         "isActive": true
       }
+    },
+    {
+      "id": "746f",
+      "productId": "2",
+      "quantity": 1,
+      "product": {
+        "id": "2",
+        "name": "Samsung Galaxy S24 Ultra",
+        "slug": "samsung-galaxy-s24-ultra",
+        "description": "Ultimate Android smartphone with S Pen and powerful processor",
+        "price": 1299.99,
+        "compareAtPrice": 1399.99,
+        "images": [
+          "/images/samsung-s24.jpg"
+        ],
+        "category": "Cell Phones & Tablets",
+        "brand": "Samsung",
+        "rating": 4.7,
+        "screenSize": "6.8\"",
+        "color": "black",
+        "memory": "512GB",
+        "condition": "New",
+        "inventory": 40,
+        "isActive": true
+      }
+    },
+    {
+      "id": "456e",
+      "productId": "3",
+      "quantity": 1,
+      "product": {
+        "id": "3",
+        "name": "iPad Air 6th Gen",
+        "slug": "ipad-air-6th-gen",
+        "description": "Versatile tablet with M2 chip and excellent display",
+        "price": 599.99,
+        "compareAtPrice": 699.99,
+        "images": [
+          "/images/ipad-air.jpg"
+        ],
+        "category": "Cell Phones & Tablets",
+        "brand": "Apple",
+        "rating": 4.6,
+        "screenSize": "11\"",
+        "color": "silver",
+        "memory": "256GB",
+        "condition": "Like New",
+        "inventory": 25,
+        "isActive": true
+      }
     }
   ],
   "wishlist": [
@@ -444,24 +494,6 @@
         ],
         "category": "Electronics",
         "inventory": 50,
-        "isActive": true
-      }
-    },
-    {
-      "id": "5cf8",
-      "productId": "2",
-      "product": {
-        "id": "2",
-        "name": "Smart Watch",
-        "slug": "smart-watch",
-        "description": "Fitness tracking smartwatch with heart rate monitor and GPS",
-        "price": 249.99,
-        "compareAtPrice": null,
-        "images": [
-          "/images/watch.jpg"
-        ],
-        "category": "Electronics",
-        "inventory": 30,
         "isActive": true
       }
     }

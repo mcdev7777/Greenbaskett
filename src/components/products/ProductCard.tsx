@@ -2,41 +2,52 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Heart, ShoppingCart, Eye } from "lucide-react";
+import { Heart, ShoppingCart, Eye, Loader } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Product } from "@/types";
 import { formatPrice } from "@/lib/utils";
 import { useWishlistStore } from "@/store/wishlist-store";
+import { useCartStore } from "@/store/cart-store";
 import { useState } from "react";
 
 interface ProductCardProps {
   product: Product;
-  onAddToCart?: (product: Product) => void;
   viewMode?: "grid" | "list";
   compact?: boolean;
 }
 
-export function ProductCard({ product, onAddToCart, viewMode = "grid", compact = false }: ProductCardProps) {
+export function ProductCard({ product, viewMode = "grid", compact = false }: ProductCardProps) {
   const hasDiscount = product.compareAtPrice && product.compareAtPrice > product.price;
-  const discountAmount = hasDiscount ? product.compareAtPrice! - product.price : 0;
+  const discountPercent = hasDiscount ? Math.round(((product.compareAtPrice! - product.price) / product.compareAtPrice!) * 100) : 0;
   const isInStock = product.inventory > 0;
-  const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlistStore();
-  const [isWishlistLoading, setIsWishlistLoading] = useState(false);
+  
+  const { isInWishlist, addToWishlist, removeFromWishlist, isLoading: isWishlistLoading } = useWishlistStore();
+  const { addItem, isLoading: isCartLoading } = useCartStore();
+  const [isCartAdding, setIsCartAdding] = useState(false);
 
   const isFavorited = isInWishlist(product.id);
 
   const handleWishlistToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
-    setIsWishlistLoading(true);
     try {
       if (isFavorited) {
         await removeFromWishlist(product.id);
       } else {
         await addToWishlist(product);
       }
+    } catch (error) {
+      // Error handled in store
+    }
+  };
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsCartAdding(true);
+    try {
+      await addItem(product, 1);
     } finally {
-      setIsWishlistLoading(false);
+      setIsCartAdding(false);
     }
   };
 
@@ -90,14 +101,26 @@ export function ProductCard({ product, onAddToCart, viewMode = "grid", compact =
             disabled={isWishlistLoading}
             className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 disabled:opacity-50"
           >
-            <Heart 
-              className="w-4 h-4" 
-              fill={isFavorited ? "currentColor" : "none"}
-              color={isFavorited ? "red" : "currentColor"}
-            />
+            {isWishlistLoading ? (
+              <Loader className="w-4 h-4 animate-spin" />
+            ) : (
+              <Heart 
+                className="w-4 h-4" 
+                fill={isFavorited ? "currentColor" : "none"}
+                color={isFavorited ? "red" : "currentColor"}
+              />
+            )}
           </button>
-          <button className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200">
-            <Eye className="w-4 h-4" />
+          <button 
+            onClick={handleAddToCart}
+            disabled={!isInStock || isCartAdding}
+            className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 disabled:opacity-50"
+          >
+            {isCartAdding ? (
+              <Loader className="w-4 h-4 animate-spin" />
+            ) : (
+              <ShoppingCart className="w-4 h-4" />
+            )}
           </button>
         </div>
       </div>
@@ -112,11 +135,11 @@ export function ProductCard({ product, onAddToCart, viewMode = "grid", compact =
           <Badge className="bg-black hover:bg-black text-white">OUT OF STOCK</Badge>
         )}
         {product.inventory < 10 && isInStock && (
-          <Badge className="bg-black hover:bg-black text-white">NEW</Badge>
+          <Badge className="bg-orange-500 hover:bg-orange-500 text-white">LOW STOCK</Badge>
         )}
         {hasDiscount && (
-          <Badge className="bg-green-600 hover:bg-green-600 text-white">
-            SAVE {formatPrice(discountAmount)}
+          <Badge className="bg-red-600 hover:bg-red-600 text-white">
+            SAVE {discountPercent}%
           </Badge>
         )}
       </div>
@@ -128,20 +151,27 @@ export function ProductCard({ product, onAddToCart, viewMode = "grid", compact =
           disabled={isWishlistLoading}
           className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-100 disabled:opacity-50"
         >
-          <Heart 
-            className="w-4 h-4" 
-            fill={isFavorited ? "currentColor" : "none"}
-            color={isFavorited ? "red" : "currentColor"}
-          />
+          {isWishlistLoading ? (
+            <Loader className="w-4 h-4 animate-spin" />
+          ) : (
+            <Heart 
+              className="w-4 h-4" 
+              fill={isFavorited ? "currentColor" : "none"}
+              color={isFavorited ? "red" : "currentColor"}
+            />
+          )}
         </button>
-        <button className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-100">
+        <Link 
+          href={`/products/${product.slug}`}
+          className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-100"
+        >
           <Eye className="w-4 h-4" />
-        </button>
+        </Link>
       </div>
 
       {/* Product Image */}
       <Link href={`/products/${product.slug}`} className="block">
-        <div className={`${compact ? "aspect-square" : "aspect-square"} bg-gray-100 rounded-lg mb-3 relative overflow-hidden`}>
+        <div className="aspect-square bg-gray-100 rounded-lg mb-3 relative overflow-hidden">
           <Image
             src={product.images[0] || "/placeholder.png"}
             alt={product.name}
@@ -153,19 +183,24 @@ export function ProductCard({ product, onAddToCart, viewMode = "grid", compact =
 
       {/* Rating */}
       <div className="flex items-center gap-1 mb-2 text-xs text-gray-500">
-        <span>(152)</span>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <span key={i} className={i < Math.round(product.rating) ? "text-yellow-400" : "text-gray-300"}>
+            ⭐
+          </span>
+        ))}
+        <span>({product.rating})</span>
       </div>
 
       {/* Product Info */}
       <Link href={`/products/${product.slug}`}>
-        <h3 className={`font-semibold ${compact ? "text-sm mb-1" : "mb-2"} hover:text-green-600 transition line-clamp-2 ${compact ? "min-h-[32px]" : "min-h-[48px]"}`}>
+        <h3 className="font-semibold mb-2 hover:text-green-600 transition line-clamp-2 min-h-[48px]">
           {product.name}
         </h3>
       </Link>
 
       {/* Price */}
       <div className="flex items-center gap-2 mb-3">
-        <span className={`${compact ? "text-base" : "text-lg"} font-bold text-red-600`}>
+        <span className="text-lg font-bold text-red-600">
           {formatPrice(product.price)}
         </span>
         {hasDiscount && (
@@ -195,16 +230,26 @@ export function ProductCard({ product, onAddToCart, viewMode = "grid", compact =
         </Badge>
       )}
 
-      {/* Contact Button (for out of stock) or Add to Cart */}
+      {/* Add to Cart Button */}
       {!compact && (
         isInStock ? (
           <Button
-            onClick={() => onAddToCart?.(product)}
+            onClick={handleAddToCart}
+            disabled={isCartAdding}
             className="w-full bg-green-600 hover:bg-green-700 text-white text-sm"
             size="sm"
           >
-            <ShoppingCart className="w-4 h-4 mr-2" />
-            Add to Cart
+            {isCartAdding ? (
+              <>
+                <Loader className="w-4 h-4 mr-2 animate-spin" />
+                Adding...
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="w-4 h-4 mr-2" />
+                Add to Cart
+              </>
+            )}
           </Button>
         ) : (
           <Button
@@ -212,7 +257,7 @@ export function ProductCard({ product, onAddToCart, viewMode = "grid", compact =
             className="w-full text-sm"
             size="sm"
           >
-            Contact
+            Out of Stock
           </Button>
         )
       )}

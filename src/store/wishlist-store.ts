@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Product } from '@/types';
 import { api } from '@/lib/api';
+import { toast } from 'sonner';
 
 interface WishlistItem {
   id: string;
@@ -11,6 +12,7 @@ interface WishlistItem {
 interface WishlistStore {
   items: WishlistItem[];
   isLoading: boolean;
+  error: string | null;
 
   fetchWishlist: () => Promise<void>;
   addToWishlist: (product: Product) => Promise<void>;
@@ -22,61 +24,75 @@ interface WishlistStore {
 export const useWishlistStore = create<WishlistStore>((set, get) => ({
   items: [],
   isLoading: false,
+  error: null,
 
   fetchWishlist: async () => {
-    set({ isLoading: true });
+    set({ isLoading: true, error: null });
     try {
       const items = await api.getWishlist();
       set({ items, isLoading: false });
     } catch (error) {
-      console.error('Failed to fetch wishlist:', error);
-      set({ isLoading: false });
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch wishlist';
+      set({ error: errorMessage, isLoading: false });
     }
   },
 
   addToWishlist: async (product: Product) => {
-    set({ isLoading: true });
-    try {
-      // Optimistic update
-      const newItem: WishlistItem = {
-        id: Date.now().toString(),
-        productId: product.id,
-        product,
-      };
-      set((state) => ({
-        items: [...state.items, newItem],
-      }));
+    const previousItems = get().items;
+    
+    // Check if already in wishlist
+    if (get().isInWishlist(product.id)) {
+      toast.info('Already in your wishlist');
+      return;
+    }
 
+    // Optimistic update
+    const newItem: WishlistItem = {
+      id: `wishlist_${Date.now()}`,
+      productId: product.id,
+      product,
+    };
+    set((state) => ({
+      items: [...state.items, newItem],
+    }));
+
+    set({ isLoading: true, error: null });
+    try {
       // API call
       await api.addToWishlist(product.id);
       // Re-fetch to sync with server
       await get().fetchWishlist();
     } catch (error) {
-      console.error('Failed to add to wishlist:', error);
       // Revert optimistic update on error
-      set((state) => ({
-        items: state.items.filter((item) => item.productId !== product.id),
+      set({
+        items: previousItems,
         isLoading: false,
-      }));
+        error: error instanceof Error ? error.message : 'Failed to add to wishlist'
+      });
     }
   },
 
   removeFromWishlist: async (productId: string) => {
-    set({ isLoading: true });
-    try {
-      // Optimistic update
-      set((state) => ({
-        items: state.items.filter((item) => item.productId !== productId),
-      }));
+    const previousItems = get().items;
+    
+    // Optimistic update
+    set((state) => ({
+      items: state.items.filter((item) => item.productId !== productId),
+    }));
 
+    set({ isLoading: true, error: null });
+    try {
       // API call
       await api.removeFromWishlist(productId);
       // Re-fetch to sync with server
       await get().fetchWishlist();
     } catch (error) {
-      console.error('Failed to remove from wishlist:', error);
       // Revert optimistic update on error
-      await get().fetchWishlist();
+      set({
+        items: previousItems,
+        isLoading: false,
+        error: error instanceof Error ? error.message : 'Failed to remove from wishlist'
+      });
     }
   },
 

@@ -24,6 +24,14 @@ export interface CartItem {
   product: Product;
 }
 
+export interface OrderItem {
+  productId: string;
+  productName: string;
+  quantity: number;
+  price: number;
+  image: string;
+}
+
 export interface Order {
   id: string;
   orderNumber: string;
@@ -31,10 +39,45 @@ export interface Order {
   total: number;
   status: 'pending' | 'processing' | 'completed' | 'cancelled';
   createdAt: string;
+  customerInfo?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    address: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
+  shippingMethod?: 'standard' | 'express' | 'overnight';
+  paymentMethod?: 'credit-card' | 'paypal' | 'bank-transfer';
 }
 
-export interface OrderItem {
-  productId: string;
-  quantity: number;
-  price: number;
+export interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  country?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FilterOptions {
+  category?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  brand?: string;
+  inStock?: boolean;
+  sortBy?: 'price-low' | 'price-high' | 'newest' | 'rating';
+}
+
+export interface SearchFilters extends FilterOptions {
+  query?: string;
 }
