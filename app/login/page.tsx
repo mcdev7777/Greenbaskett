@@ -4,39 +4,19 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FormError } from "@/components/ui/FormError";
-import { loginSchema, type LoginFormData } from "@/lib/validations";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    mode: "onBlur",
-  });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const onSubmit = async (data: LoginFormData) => {
-    try {
-      setIsLoading(true);
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.success("Login successful! Redirecting...");
-      console.log("Login:", data);
-    } catch (error) {
-      toast.error("Login failed. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle login logic here
+    console.log("Login:", { email, password });
   };
 
   return (
@@ -72,7 +52,7 @@ export default function LoginPage() {
                 LOGIN TO CONTINUE
               </p>
 
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <form onSubmit={handleLogin} className="space-y-6">
                 {/* Email */}
                 <div>
                   <label className="block text-sm font-semibold mb-2">
@@ -81,12 +61,11 @@ export default function LoginPage() {
                   <Input
                     type="email"
                     placeholder="Example@gmail.com"
-                    {...register("email")}
-                    className={`h-12 ${
-                      errors.email ? "border-red-500" : ""
-                    }`}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="h-12"
                   />
-                  <FormError error={errors.email} />
                 </div>
 
                 {/* Password */}
@@ -98,10 +77,10 @@ export default function LoginPage() {
                     <Input
                       type={showPassword ? "text" : "password"}
                       placeholder="••••"
-                      {...register("password")}
-                      className={`h-12 pr-12 ${
-                        errors.password ? "border-red-500" : ""
-                      }`}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="h-12 pr-12"
                     />
                     <button
                       type="button"
@@ -115,7 +94,6 @@ export default function LoginPage() {
                       )}
                     </button>
                   </div>
-                  <FormError error={errors.password} />
                 </div>
 
                 {/* Forget Password */}
@@ -131,10 +109,9 @@ export default function LoginPage() {
                 {/* Login Button */}
                 <Button
                   type="submit"
-                  disabled={isLoading}
-                  className="w-full h-12 bg-green-600 hover:bg-green-700 text-white text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full h-12 bg-green-600 hover:bg-green-700 text-white text-base font-semibold"
                 >
-                  {isLoading ? "LOGGING IN..." : "LOGIN"}
+                  LOGIN
                 </Button>
 
                 {/* Sign Up Link */}

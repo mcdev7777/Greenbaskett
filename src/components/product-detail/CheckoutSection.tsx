@@ -2,15 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
 import { useCartStore } from "@/store/cart-store";
 import { formatPrice } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { FormError } from "@/components/ui/FormError";
 import {
   Select,
   SelectContent,
@@ -18,43 +14,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { checkoutSchema, type CheckoutFormData } from "@/lib/validations";
 
 export function CheckoutSection() {
   const { items, getTotal, fetchCart } = useCartStore();
   const [paymentMethod, setPaymentMethod] = useState("bank-transfer");
-  const [isLoading, setIsLoading] = useState(false);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setValue,
-  } = useForm<CheckoutFormData>({
-    resolver: zodResolver(checkoutSchema),
-    mode: "onBlur",
-    defaultValues: {
-      country: "us",
-      state: "wa",
-    },
-  });
   
   useEffect(() => {
     fetchCart();
   }, [fetchCart]);
-
-  const onSubmit = async (data: CheckoutFormData) => {
-    try {
-      setIsLoading(true);
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      toast.success("Order placed successfully!");
-      console.log("Checkout:", data);
-    } catch (error) {
-      toast.error("Failed to place order. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const subtotal = getTotal();
   const shipping = 9.50;
@@ -91,32 +58,20 @@ export function CheckoutSection() {
           <div className="lg:col-span-2">
             <h3 className="text-xl font-bold mb-6">Billing Detail</h3>
             
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form className="space-y-4">
               {/* Name Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold mb-2">
                     First Name <span className="text-red-600">*</span>
                   </label>
-                  <Input
-                    {...register("firstName")}
-                    className={`${
-                      errors.firstName ? "border-red-500" : ""
-                    }`}
-                  />
-                  <FormError error={errors.firstName} />
+                  <Input placeholder="" required />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold mb-2">
                     Last Name <span className="text-red-600">*</span>
                   </label>
-                  <Input
-                    {...register("lastName")}
-                    className={`${
-                      errors.lastName ? "border-red-500" : ""
-                    }`}
-                  />
-                  <FormError error={errors.lastName} />
+                  <Input placeholder="" required />
                 </div>
               </div>
 
@@ -125,42 +80,7 @@ export function CheckoutSection() {
                 <label className="block text-sm font-semibold mb-2">
                   Company Name (Optional)
                 </label>
-                <Input
-                  {...register("company")}
-                  className={`${
-                    errors.company ? "border-red-500" : ""
-                  }`}
-                />
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className="block text-sm font-semibold mb-2">
-                  Email Address <span className="text-red-600">*</span>
-                </label>
-                <Input
-                  type="email"
-                  {...register("email")}
-                  className={`${
-                    errors.email ? "border-red-500" : ""
-                  }`}
-                />
-                <FormError error={errors.email} />
-              </div>
-
-              {/* Phone */}
-              <div>
-                <label className="block text-sm font-semibold mb-2">
-                  Phone Number <span className="text-red-600">*</span>
-                </label>
-                <Input
-                  type="tel"
-                  {...register("phone")}
-                  className={`${
-                    errors.phone ? "border-red-500" : ""
-                  }`}
-                />
-                <FormError error={errors.phone} />
+                <Input placeholder="" />
               </div>
 
               {/* Country */}
@@ -168,13 +88,8 @@ export function CheckoutSection() {
                 <label className="block text-sm font-semibold mb-2">
                   Country / Region <span className="text-red-600">*</span>
                 </label>
-                <Select
-                  defaultValue="us"
-                  onValueChange={(value) => setValue("country", value)}
-                >
-                  <SelectTrigger className={`${
-                    errors.country ? "border-red-500" : ""
-                  }`}>
+                <Select defaultValue="us">
+                  <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -184,7 +99,6 @@ export function CheckoutSection() {
                     <SelectItem value="ke">Kenya</SelectItem>
                   </SelectContent>
                 </Select>
-                <FormError error={errors.country} />
               </div>
 
               {/* Street Address */}
@@ -192,17 +106,13 @@ export function CheckoutSection() {
                 <label className="block text-sm font-semibold mb-2">
                   Street Address <span className="text-red-600">*</span>
                 </label>
-                <Input
-                  placeholder="House number and street name ..."
-                  {...register("address")}
-                  className={`mb-3 ${
-                    errors.address ? "border-red-500" : ""
-                  }`}
+                <Input 
+                  placeholder="House number and street name ..." 
+                  className="mb-3"
+                  required 
                 />
-                <FormError error={errors.address} />
-                <Input
-                  placeholder="Apartment, suite, unit, etc (Optional)"
-                  {...register("apartment")}
+                <Input 
+                  placeholder="Apartment, suite, unit, etc (Optional)" 
                 />
               </div>
 
@@ -211,13 +121,7 @@ export function CheckoutSection() {
                 <label className="block text-sm font-semibold mb-2">
                   Town / City <span className="text-red-600">*</span>
                 </label>
-                <Input
-                  {...register("city")}
-                  className={`${
-                    errors.city ? "border-red-500" : ""
-                  }`}
-                />
-                <FormError error={errors.city} />
+                <Input placeholder="" required />
               </div>
 
               {/* State/County */}
@@ -225,13 +129,8 @@ export function CheckoutSection() {
                 <label className="block text-sm font-semibold mb-2">
                   State / County <span className="text-red-600">*</span>
                 </label>
-                <Select
-                  defaultValue="wa"
-                  onValueChange={(value) => setValue("state", value)}
-                >
-                  <SelectTrigger className={`${
-                    errors.state ? "border-red-500" : ""
-                  }`}>
+                <Select defaultValue="wa">
+                  <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -241,7 +140,6 @@ export function CheckoutSection() {
                     <SelectItem value="tx">Texas</SelectItem>
                   </SelectContent>
                 </Select>
-                <FormError error={errors.state} />
               </div>
 
               {/* Zip Code */}
@@ -249,13 +147,23 @@ export function CheckoutSection() {
                 <label className="block text-sm font-semibold mb-2">
                   Zip Code <span className="text-red-600">*</span>
                 </label>
-                <Input
-                  {...register("zipCode")}
-                  className={`${
-                    errors.zipCode ? "border-red-500" : ""
-                  }`}
-                />
-                <FormError error={errors.zipCode} />
+                <Input placeholder="" required />
+              </div>
+
+              {/* Phone */}
+              <div>
+                <label className="block text-sm font-semibold mb-2">
+                  Phone Number <span className="text-red-600">*</span>
+                </label>
+                <Input type="tel" placeholder="" required />
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-semibold mb-2">
+                  Email Address <span className="text-red-600">*</span>
+                </label>
+                <Input type="email" placeholder="" required />
               </div>
 
               {/* Create Account */}
@@ -264,6 +172,11 @@ export function CheckoutSection() {
                 <label htmlFor="create-account" className="text-sm cursor-pointer">
                   Create an account?
                 </label>
+              </div>
+
+              {/* Ship to Different Address */}
+              <div className="pt-4">
+                <h4 className="font-bold text-lg mb-2">Ship to a different address?</h4>
               </div>
 
               {/* Additional Information */}
@@ -389,12 +302,8 @@ export function CheckoutSection() {
               </div>
 
               {/* Place Order Button */}
-              <Button
-                form="checkout-form"
-                disabled={isLoading}
-                className="w-full bg-green-600 hover:bg-green-700 text-white h-12 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? "PLACING ORDER..." : "PLACE ORDER"}
+              <Button className="w-full bg-green-600 hover:bg-green-700 text-white h-12 text-base font-semibold">
+                PLACE ORDER
               </Button>
             </div>
           </div>

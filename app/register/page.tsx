@@ -3,40 +3,24 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FormError } from "@/components/ui/FormError";
-import { registerSchema, type RegisterFormData } from "@/lib/validations";
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
-    mode: "onBlur",
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
 
-  const onSubmit = async (data: RegisterFormData) => {
-    try {
-      setIsLoading(true);
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.success("Registration successful! Please log in.");
-      console.log("Register:", data);
-    } catch (error) {
-      toast.error("Registration failed. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+  const handleRegister = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle registration logic here
+    console.log("Register:", formData);
   };
 
   return (
@@ -72,7 +56,7 @@ export default function RegisterPage() {
                 JOIN TO US
               </p>
 
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <form onSubmit={handleRegister} className="space-y-6">
                 {/* Your Name */}
                 <div>
                   <label className="block text-sm font-semibold mb-2">
@@ -81,12 +65,11 @@ export default function RegisterPage() {
                   <Input
                     type="text"
                     placeholder="Jhon Deo"
-                    {...register("name")}
-                    className={`h-12 ${
-                      errors.name ? "border-red-500" : ""
-                    }`}
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                    className="h-12"
                   />
-                  <FormError error={errors.name} />
                 </div>
 
                 {/* Email */}
@@ -97,12 +80,11 @@ export default function RegisterPage() {
                   <Input
                     type="email"
                     placeholder="Example@gmail.com"
-                    {...register("email")}
-                    className={`h-12 ${
-                      errors.email ? "border-red-500" : ""
-                    }`}
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    required
+                    className="h-12"
                   />
-                  <FormError error={errors.email} />
                 </div>
 
                 {/* Password */}
@@ -114,10 +96,10 @@ export default function RegisterPage() {
                     <Input
                       type={showPassword ? "text" : "password"}
                       placeholder="••••"
-                      {...register("password")}
-                      className={`h-12 pr-12 ${
-                        errors.password ? "border-red-500" : ""
-                      }`}
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      required
+                      className="h-12 pr-12"
                     />
                     <button
                       type="button"
@@ -131,7 +113,6 @@ export default function RegisterPage() {
                       )}
                     </button>
                   </div>
-                  <FormError error={errors.password} />
                 </div>
 
                 {/* Confirm Password */}
@@ -143,10 +124,10 @@ export default function RegisterPage() {
                     <Input
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="••••"
-                      {...register("confirmPassword")}
-                      className={`h-12 pr-12 ${
-                        errors.confirmPassword ? "border-red-500" : ""
-                      }`}
+                      value={formData.confirmPassword}
+                      onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                      required
+                      className="h-12 pr-12"
                     />
                     <button
                       type="button"
@@ -160,16 +141,14 @@ export default function RegisterPage() {
                       )}
                     </button>
                   </div>
-                  <FormError error={errors.confirmPassword} />
                 </div>
 
                 {/* Register Button */}
                 <Button
                   type="submit"
-                  disabled={isLoading}
-                  className="w-full h-12 bg-green-600 hover:bg-green-700 text-white text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full h-12 bg-green-600 hover:bg-green-700 text-white text-base font-semibold"
                 >
-                  {isLoading ? "REGISTERING..." : "REGISTER"}
+                  REGISTER
                 </Button>
 
                 {/* Login Link */}
