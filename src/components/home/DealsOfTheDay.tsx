@@ -1,11 +1,24 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
+
+const dealImages = {
+  mainProduct: "https://i.pinimg.com/736x/84/99/98/8499981321bac3c35bedfb4c54b0ff80.jpg",
+  thumbnails: [
+    "https://i.pinimg.com/736x/e7/a7/97/e7a79727d961962f720ce07d545fb0af.jpg",
+    "https://i.pinimg.com/736x/6d/9c/0d/6d9c0dd6adecb5261814264ea872b053.jpg",
+    "https://i.pinimg.com/736x/d3/e9/ba/d3e9bafb6fe2a7bc860a629cc1fa02ae.jpg", 
+    "https://i.pinimg.com/736x/bb/92/ae/bb92ae98e273f52cbcfff35aa7b6bd04.jpg",
+  ],
+  gameController: "https://i.pinimg.com/1200x/6b/d6/ec/6bd6ec9c5d6a2a51459e1e04d57dc5a8.jpg",
+  tablet: "https://i.pinimg.com/736x/52/fb/c0/52fbc0c4679344ae11b7551756364b6d.jpg",
+};
 
 export function DealsOfTheDay() {
   // Countdown timer state
@@ -64,13 +77,18 @@ export function DealsOfTheDay() {
         <div className="grid grid-cols-12 gap-6">
           {/* Left Thumbnails */}
           <div className="col-span-1 space-y-4">
-            {[1, 2, 3, 4].map((i) => (
+            {dealImages.thumbnails.map((thumb, i) => (
               <div
                 key={i}
                 className="border rounded p-2 cursor-pointer hover:border-green-600 transition"
               >
-                <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center">
-                  📱
+                <div className="relative w-12 h-12 bg-gray-200 rounded overflow-hidden">
+                  <Image
+                    src={thumb}
+                    alt={`Product view ${i + 1}`}
+                    fill
+                    className="object-cover"
+                  />
                 </div>
               </div>
             ))}
@@ -78,14 +96,19 @@ export function DealsOfTheDay() {
 
           {/* Main Product Image */}
           <div className="col-span-12 md:col-span-3 relative">
-            <Badge className="absolute top-0 left-0 bg-green-600 hover:bg-green-600 text-white px-4 py-2">
+            <Badge className="absolute top-0 left-0 z-10 bg-green-600 hover:bg-green-600 text-white px-4 py-2">
               SAVE
               <br />
               $199.00
             </Badge>
             <div className="flex items-center justify-center h-full">
-              <div className="w-64 h-80 bg-gray-100 rounded-lg flex items-center justify-center text-6xl">
-                📱
+              <div className="relative w-64 h-80 bg-gray-100 rounded-lg overflow-hidden">
+                <Image
+                  src={dealImages.mainProduct}
+                  alt="Xioma Redmi Note 11 Pro"
+                  fill
+                  className="object-contain p-4"
+                />
               </div>
             </div>
           </div>
@@ -176,20 +199,34 @@ export function DealsOfTheDay() {
           {/* Right Promotional Banners */}
           <div className="col-span-12 md:col-span-3 space-y-4">
             {/* Gaming Controller Banner */}
-            <div className="bg-gradient-to-br from-gray-700 to-gray-900 rounded-lg p-6 h-48 relative overflow-hidden">
-              <Badge className="absolute top-4 right-4 bg-yellow-400 text-black hover:bg-yellow-400 font-bold">
+            <div className="relative bg-gradient-to-br from-gray-700 to-gray-900 rounded-lg p-6 h-48 overflow-hidden">
+              <Image
+                src={dealImages.gameController}
+                alt="Gaming Controller Sale"
+                fill
+                className="object-cover opacity-30"
+              />
+              <Badge className="absolute top-4 right-4 z-10 bg-yellow-400 text-black hover:bg-yellow-400 font-bold">
                 50%
               </Badge>
-              <div className="text-5xl font-bold text-gray-600 opacity-50">
-                SALE
+              <div className="relative z-10">
+                <div className="text-5xl font-bold text-white opacity-70">
+                  SALE
+                </div>
               </div>
-              <div className="mt-4 text-4xl">🎮</div>
             </div>
 
             {/* Tablets Banner */}
-            <div className="bg-gradient-to-br from-green-800 to-green-900 rounded-lg p-6 h-48 relative overflow-hidden">
-              <div className="text-4xl mb-2">📱💻</div>
-              <div className="text-white font-bold text-xl">Tablets</div>
+            <div className="relative bg-gradient-to-br from-green-800 to-green-900 rounded-lg p-6 h-48 overflow-hidden">
+              <Image
+                src={dealImages.tablet}
+                alt="Tablets"
+                fill
+                className="object-cover opacity-40"
+              />
+              <div className="relative z-10">
+                <div className="text-white font-bold text-xl">Tablets</div>
+              </div>
             </div>
           </div>
         </div>

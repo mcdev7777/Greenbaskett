@@ -216,22 +216,11 @@ export function Footer() {
         {/* Bottom Footer */}
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           {/* Language & Currency */}
-          <div className="flex items-center gap-4">
-            <select className="text-sm border rounded px-3 py-1 bg-white">
-              <option>USD</option>
-              <option>EUR</option>
-              <option>GBP</option>
-            </select>
-            <select className="text-sm border rounded px-3 py-1 bg-white">
-              <option>🇺🇸 Eng</option>
-              <option>🇪🇸 Esp</option>
-              <option>🇫🇷 Fra</option>
-            </select>
-          </div>
+          
 
           {/* Copyright */}
           <div className="text-sm text-gray-600">
-            © 2024 <span className="font-bold">Shawonetc3</span>. All Rights Reserved
+            © 2025 <span className="font-bold">Shawonetc3</span>. All Rights Reserved
           </div>
 
           {/* Payment Methods */}
