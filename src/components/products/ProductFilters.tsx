@@ -270,20 +270,22 @@ export function ProductFilters({ products, onClose }: ProductFiltersProps) {
       </div>
 
       {/* Memory */}
-      <div className="border-t pt-4">
-        <h3 className="font-bold text-sm mb-4 uppercase">Memory</h3>
-        <div className="grid grid-cols-2 gap-2">
-         {getMemoryOptions().map((memory, index) => (
-  <label key={`${memory.value}-${index}`} className="flex items-center gap-2 cursor-pointer">
-    <Checkbox
-      checked={filters.memory.includes(memory.value)}
-      onCheckedChange={() => toggleFilter("memory", memory.value)}
-    />
-    <span className="text-sm">{memory.label}</span>
-  </label>
-))}
-        </div>
-      </div>
+      {/* Memory */}
+<div className="border-t pt-4">
+  <h3 className="font-bold text-sm mb-4 uppercase">Memory</h3>
+  <div className="grid grid-cols-2 gap-2">
+    {getMemoryOptions().map((memory, index) => (
+      <label key={`${memory.value}-${index}`} className="flex items-center gap-2 cursor-pointer">
+        <Checkbox
+          checked={filters.memory.includes(memory.value)}
+          onCheckedChange={() => toggleFilter("memory", memory.value)}
+        />
+        <span className="text-sm">{memory.name}</span>
+        <span className="text-xs text-gray-500 ml-auto">({memory.count})</span>
+      </label>
+    ))}
+  </div>
+</div>
 
       {/* Condition */}
       <div className="border-t pt-4">

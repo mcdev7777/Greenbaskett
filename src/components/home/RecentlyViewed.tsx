@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { ProductCard } from "@/components/products/ProductCard";
 import { Product } from "@/types";
-import { useCartStore } from "@/store/cart-store";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
@@ -13,7 +12,6 @@ interface RecentlyViewedProps {
 }
 
 export function RecentlyViewed({ products: initialProducts }: RecentlyViewedProps) {
-  const { addItem } = useCartStore();
   const [products, setProducts] = useState<Product[]>(initialProducts || []);
   const [loading, setLoading] = useState(!initialProducts);
 
@@ -32,10 +30,6 @@ export function RecentlyViewed({ products: initialProducts }: RecentlyViewedProp
       fetchProducts();
     }
   }, [initialProducts]);
-
-  const handleAddToCart = async (product: Product) => {
-    await addItem(product, 1);
-  };
 
   return (
     <section className="container mx-auto px-4 py-12">
@@ -70,7 +64,6 @@ export function RecentlyViewed({ products: initialProducts }: RecentlyViewedProp
               <ProductCard
                 key={product.id}
                 product={product}
-                onAddToCart={handleAddToCart}
               />
             ))
           ) : (
