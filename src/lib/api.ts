@@ -1,72 +1,93 @@
-import axios from 'axios';
 import { Product, CartItem, Order } from '@/types';
 import { toast } from 'sonner';
+import { supabase } from '@/lib/supabase';
 
-const API_URL = 'http://localhost:3001';
-
-// Configure axios instance
-const axiosInstance = axios.create({
-  baseURL: API_URL,
-  timeout: 10000,
+// Transform Supabase product to our Product type
+const transformSupabaseProduct = (data: any): Product => ({
+  id: data.id,
+  name: data.name,
+  slug: data.slug,
+  description: data.description || '',
+  price: Number(data.price),
+  compareAtPrice: data.compare_at_price ? Number(data.compare_at_price) : undefined,
+  images: data.images || [],
+  category: data.category || '',
+  brand: data.brand,
+  rating: data.rating,
+  color: data.color,
+  condition: data.condition,
+  inventory: data.inventory || 0,
+  isActive: true,
 });
-
-// Error handler - throws always
-const handleError = (error: any, defaultMessage: string): never => {
-  if (axios.isAxiosError(error)) {
-    const message = error.response?.data?.message || error.message || defaultMessage;
-    toast.error(message);
-    throw new Error(message);
-  }
-  toast.error(defaultMessage);
-  throw error;
-};
 
 export const api = {
   // ============ PRODUCTS ============
   getProducts: async (): Promise<Product[]> => {
     try {
-      const { data } = await axiosInstance.get<Product[]>('/products');
-      return data;
-    } catch (error) {
-      return handleError(error, 'Failed to fetch products');
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('name');
+
+      if (error) throw error;
+      return data.map(transformSupabaseProduct);
+    } catch (error: any) {
+      toast.error('Failed to fetch products');
+      throw error;
     }
   },
 
   getProductBySlug: async (slug: string): Promise<Product | null> => {
     try {
-      const { data } = await axiosInstance.get<Product[]>(`/products?slug=${slug}`);
-      return data[0] || null;
-    } catch (error) {
-      return handleError(error, 'Failed to fetch product');
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('slug', slug)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') return null;
+        throw error;
+      }
+      return data ? transformSupabaseProduct(data) : null;
+    } catch (error: any) {
+      toast.error('Failed to fetch product');
+      throw error;
     }
   },
 
   getProductById: async (id: string): Promise<Product | null> => {
     try {
-      const { data } = await axiosInstance.get<Product>(`/products/${id}`);
-      return data;
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status === 404) {
-        return null;
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') return null;
+        throw error;
       }
-      return handleError(error, 'Failed to fetch product');
+      return data ? transformSupabaseProduct(data) : null;
+    } catch (error: any) {
+      return null;
     }
   },
 
   searchProducts: async (query: string): Promise<Product[]> => {
     try {
       if (!query.trim()) return [];
-      const { data } = await axiosInstance.get<Product[]>('/products');
-      const searchTerm = query.toLowerCase();
-      return data.filter(
-        product =>
-          product.name.toLowerCase().includes(searchTerm) ||
-          product.description.toLowerCase().includes(searchTerm) ||
-          product.category.toLowerCase().includes(searchTerm) ||
-          product.brand.toLowerCase().includes(searchTerm)
-      );
-    } catch (error) {
-      return handleError(error, 'Failed to search products');
+      
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .or(`name.ilike.%${query}%,description.ilike.%${query}%,category.ilike.%${query}%,brand.ilike.%${query}%`);
+
+      if (error) throw error;
+      return data.map(transformSupabaseProduct);
+    } catch (error: any) {
+      toast.error('Failed to search products');
+      throw error;
     }
   },
 
@@ -78,55 +99,92 @@ export const api = {
     inStock?: boolean;
   }): Promise<Product[]> => {
     try {
-      const { data } = await axiosInstance.get<Product[]>('/products');
-      return data.filter(product => {
-        if (filters.category && product.category !== filters.category) return false;
-        if (filters.minPrice && product.price < filters.minPrice) return false;
-        if (filters.maxPrice && product.price > filters.maxPrice) return false;
-        if (filters.brand && product.brand !== filters.brand) return false;
-        if (filters.inStock && product.inventory <= 0) return false;
-        return true;
-      });
-    } catch (error) {
-      return handleError(error, 'Failed to filter products');
+      let query = supabase.from('products').select('*');
+
+      if (filters.category) query = query.eq('category', filters.category);
+      if (filters.minPrice) query = query.gte('price', filters.minPrice);
+      if (filters.maxPrice) query = query.lte('price', filters.maxPrice);
+      if (filters.brand) query = query.eq('brand', filters.brand);
+      if (filters.inStock) query = query.gt('inventory', 0);
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data.map(transformSupabaseProduct);
+    } catch (error: any) {
+      toast.error('Failed to filter products');
+      throw error;
     }
   },
 
   // ============ CART ============
   getCart: async (): Promise<CartItem[]> => {
     try {
-      const { data } = await axiosInstance.get<CartItem[]>('/cart');
-      return data;
-    } catch (error) {
-      return handleError(error, 'Failed to fetch cart');
+      const { data, error } = await supabase
+        .from('cart')
+        .select(`*, product:products(*)`);
+
+      if (error) throw error;
+      
+      return data.map((item: any) => ({
+        id: item.id,
+        productId: item.product_id,
+        quantity: item.quantity,
+        product: transformSupabaseProduct(item.product),
+      }));
+    } catch (error: any) {
+      toast.error('Failed to fetch cart');
+      throw error;
     }
   },
 
   addToCart: async (productId: string, quantity: number = 1): Promise<CartItem> => {
     try {
-      const cart = await api.getCart();
-      const existingItem = cart.find(item => item.productId === productId);
+      const userId = 'temp-user-id';
 
-      if (existingItem) {
-        const { data } = await axiosInstance.patch<CartItem>(`/cart/${existingItem.id}`, {
-          quantity: existingItem.quantity + quantity
-        });
+      const { data: existing } = await supabase
+        .from('cart')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('product_id', productId)
+        .single();
+
+      if (existing) {
+        const { data, error } = await supabase
+          .from('cart')
+          .update({ quantity: existing.quantity + quantity })
+          .eq('id', existing.id)
+          .select(`*, product:products(*)`)
+          .single();
+
+        if (error) throw error;
         toast.success('Cart updated');
-        return data;
+        
+        return {
+          id: data.id,
+          productId: data.product_id,
+          quantity: data.quantity,
+          product: transformSupabaseProduct(data.product),
+        };
       } else {
-        const product = await api.getProductById(productId);
-        if (!product) throw new Error('Product not found');
+        const { data, error } = await supabase
+          .from('cart')
+          .insert({ user_id: userId, product_id: productId, quantity })
+          .select(`*, product:products(*)`)
+          .single();
 
-        const { data } = await axiosInstance.post<CartItem>('/cart', {
-          productId,
-          quantity,
-          product
-        });
+        if (error) throw error;
         toast.success('Added to cart');
-        return data;
+        
+        return {
+          id: data.id,
+          productId: data.product_id,
+          quantity: data.quantity,
+          product: transformSupabaseProduct(data.product),
+        };
       }
-    } catch (error) {
-      return handleError(error, 'Failed to add item to cart');
+    } catch (error: any) {
+      toast.error('Failed to add item to cart');
+      throw error;
     }
   },
 
@@ -134,117 +192,178 @@ export const api = {
     try {
       if (quantity <= 0) {
         await api.removeFromCart(id);
-        const { data: cartData } = await axiosInstance.get<CartItem[]>('/cart');
-        return cartData.find(item => item.id === id) || {} as CartItem;
+        return {} as CartItem;
       }
 
-      const { data } = await axiosInstance.patch<CartItem>(`/cart/${id}`, { quantity });
-      return data;
-    } catch (error) {
-      return handleError(error, 'Failed to update cart item');
+      const { data, error } = await supabase
+        .from('cart')
+        .update({ quantity })
+        .eq('id', id)
+        .select(`*, product:products(*)`)
+        .single();
+
+      if (error) throw error;
+      
+      return {
+        id: data.id,
+        productId: data.product_id,
+        quantity: data.quantity,
+        product: transformSupabaseProduct(data.product),
+      };
+    } catch (error: any) {
+      toast.error('Failed to update cart item');
+      throw error;
     }
   },
 
   removeFromCart: async (id: string): Promise<void> => {
     try {
-      await axiosInstance.delete(`/cart/${id}`);
+      const { error } = await supabase.from('cart').delete().eq('id', id);
+      if (error) throw error;
       toast.success('Removed from cart');
-    } catch (error) {
-      return handleError(error, 'Failed to remove item from cart');
+    } catch (error: any) {
+      toast.error('Failed to remove item from cart');
+      throw error;
     }
   },
 
   clearCart: async (): Promise<void> => {
     try {
-      const cart = await api.getCart();
-      await Promise.all(cart.map(item => axiosInstance.delete(`/cart/${item.id}`)));
+      const userId = 'temp-user-id';
+      const { error } = await supabase.from('cart').delete().eq('user_id', userId);
+      if (error) throw error;
       toast.success('Cart cleared');
-    } catch (error) {
-      return handleError(error, 'Failed to clear cart');
+    } catch (error: any) {
+      toast.error('Failed to clear cart');
+      throw error;
     }
   },
 
   // ============ WISHLIST ============
   getWishlist: async () => {
     try {
-      const { data } = await axiosInstance.get('/wishlist');
-      return data;
-    } catch (error) {
-      return handleError(error, 'Failed to fetch wishlist');
+      const { data, error } = await supabase
+        .from('wishlist')
+        .select(`*, product:products(*)`);
+
+      if (error) throw error;
+      
+      return data.map((item: any) => ({
+        id: item.id,
+        productId: item.product_id,
+        product: transformSupabaseProduct(item.product),
+      }));
+    } catch (error: any) {
+      toast.error('Failed to fetch wishlist');
+      throw error;
     }
   },
 
   addToWishlist: async (productId: string) => {
     try {
-      const wishlist = await api.getWishlist();
-      const product = await api.getProductById(productId);
-      
-      if (!product) throw new Error('Product not found');
+      const userId = 'temp-user-id';
 
-      const existingItem = wishlist.find((item: any) => item.productId === productId);
-      if (existingItem) {
+      const { data: existing } = await supabase
+        .from('wishlist')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('product_id', productId)
+        .single();
+
+      if (existing) {
         toast.info('Already in wishlist');
-        return existingItem;
+        return existing;
       }
 
-      const { data } = await axiosInstance.post('/wishlist', {
-        productId,
-        product
-      });
+      const { data, error } = await supabase
+        .from('wishlist')
+        .insert({ user_id: userId, product_id: productId })
+        .select(`*, product:products(*)`)
+        .single();
+
+      if (error) throw error;
       toast.success('Added to wishlist');
-      return data;
-    } catch (error) {
-      return handleError(error, 'Failed to add to wishlist');
+      
+      return {
+        id: data.id,
+        productId: data.product_id,
+        product: transformSupabaseProduct(data.product),
+      };
+    } catch (error: any) {
+      toast.error('Failed to add to wishlist');
+      throw error;
     }
   },
 
   removeFromWishlist: async (productId: string): Promise<void> => {
     try {
-      const wishlist = await api.getWishlist();
-      const item = wishlist.find((item: any) => item.productId === productId);
-      
-      if (item) {
-        await axiosInstance.delete(`/wishlist/${item.id}`);
-        toast.success('Removed from wishlist');
-      }
-    } catch (error) {
-      return handleError(error, 'Failed to remove from wishlist');
+      const userId = 'temp-user-id';
+      const { error } = await supabase
+        .from('wishlist')
+        .delete()
+        .eq('user_id', userId)
+        .eq('product_id', productId);
+
+      if (error) throw error;
+      toast.success('Removed from wishlist');
+    } catch (error: any) {
+      toast.error('Failed to remove from wishlist');
+      throw error;
     }
   },
 
   // ============ ORDERS ============
   createOrder: async (order: Omit<Order, 'id'>): Promise<Order> => {
     try {
-      const { data } = await axiosInstance.post<Order>('/orders', {
-        ...order,
-        id: `order_${Date.now()}`,
-        createdAt: new Date().toISOString()
-      });
+      const { data, error } = await supabase
+        .from('orders')
+        .insert({
+          user_id: 'temp-user-id',
+          total: order.total,
+          status: 'processing',
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
       toast.success('Order created successfully');
-      return data;
-    } catch (error) {
-      return handleError(error, 'Failed to create order');
+      
+      return { id: data.id, ...order };
+    } catch (error: any) {
+      toast.error('Failed to create order');
+      throw error;
     }
   },
 
   getOrders: async (userId?: string): Promise<Order[]> => {
     try {
-      const { data } = await axiosInstance.get<Order[]>('/orders');
-      return userId ? data.filter(order => (order as any).userId === userId) : data;
-    } catch (error) {
-      return handleError(error, 'Failed to fetch orders');
+      let query = supabase.from('orders').select('*');
+      if (userId) query = query.eq('user_id', userId);
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data as Order[];
+    } catch (error: any) {
+      toast.error('Failed to fetch orders');
+      throw error;
     }
   },
 
   getOrderById: async (orderId: string): Promise<Order | null> => {
     try {
-      const { data } = await axiosInstance.get<Order>(`/orders/${orderId}`);
-      return data;
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status === 404) {
-        return null;
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', orderId)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') return null;
+        throw error;
       }
-      return handleError(error, 'Failed to fetch order');
+      return data as Order;
+    } catch (error: any) {
+      return null;
     }
-  }
+  },
 };
