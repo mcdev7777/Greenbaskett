@@ -38,7 +38,6 @@ export function ProductCard({ product, viewMode = "grid", compact = false }: Pro
         await addToWishlist(product);
       }
     } catch (error) {
-      // Error handled in store
     }
   };
 

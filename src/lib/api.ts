@@ -25,7 +25,7 @@ const transformSupabaseProduct = (data: any): Product => ({
 const getCurrentUserId = async (): Promise<string> => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
-    throw new Error('User not authenticated');
+    throw new Error('Login required');
   }
   return user.id;
 };
@@ -125,7 +125,6 @@ export const api = {
     }
   },
 
-  // ============ CART ============
   getCart: async (): Promise<CartItem[]> => {
     try {
       const userId = await getCurrentUserId();
@@ -144,7 +143,7 @@ export const api = {
         product: transformSupabaseProduct(item.product),
       }));
     } catch (error: any) {
-      if (error.message === 'User not authenticated') {
+      if (error.message === 'Login required') {
         return []; // Return empty cart for non-authenticated users
       }
       toast.error('Failed to fetch cart');
@@ -198,7 +197,7 @@ export const api = {
         };
       }
     } catch (error: any) {
-      if (error.message === 'User not authenticated') {
+      if (error.message === 'Login required') {
         toast.error('Please login to add items to cart');
       } else {
         toast.error('Failed to add item to cart');
@@ -258,7 +257,6 @@ export const api = {
     }
   },
 
-  // ============ WISHLIST ============
   getWishlist: async () => {
     try {
       const userId = await getCurrentUserId();
@@ -276,8 +274,8 @@ export const api = {
         product: transformSupabaseProduct(item.product),
       }));
     } catch (error: any) {
-      if (error.message === 'User not authenticated') {
-        return []; // Return empty wishlist for non-authenticated users
+      if (error.message === 'Login required') {
+        return [];
       }
       toast.error('Failed to fetch wishlist');
       throw error;
@@ -315,7 +313,7 @@ export const api = {
         product: transformSupabaseProduct(data.product),
       };
     } catch (error: any) {
-      if (error.message === 'User not authenticated') {
+      if (error.message === 'Login required') {
         toast.error('Please login to add items to wishlist');
       } else {
         toast.error('Failed to add to wishlist');
@@ -341,7 +339,6 @@ export const api = {
     }
   },
 
-  // ============ ORDERS ============
   createOrder: async (order: Omit<Order, 'id'>): Promise<Order> => {
     try {
       const userId = await getCurrentUserId();
