@@ -58,7 +58,7 @@ A full-stack e-commerce web application built with Next.js 15, TypeScript, and S
 
 1. **Clone the repository**
 ```bash
-   git clone https://github.com/E-ugine/Greenbaskett.git
+   git clone https://github.com/mcdev7777/Greenbaskett.git
    cd Greenbaskett
 ```
 
@@ -301,8 +301,8 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ## Author
 
-- GitHub: [@E-ugine](https://github.com/E-ugine)
-- Project Link: [https://github.com/E-ugine/Greenbaskett](https://github.com/E-ugine/Greenbaskett)
+- GitHub: [@mcdev7777](https://github.com/mcdev7777)
+- Project Link: [https://github.com/mcdev7777/Greenbaskett](https://github.com/mcdev7777/Greenbaskett)
 
 ##  Acknowledgments
 
