@@ -301,7 +301,6 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ## Author
 
-**Eugene** (Madmax)
 - GitHub: [@E-ugine](https://github.com/E-ugine)
 - Project Link: [https://github.com/E-ugine/Greenbaskett](https://github.com/E-ugine/Greenbaskett)
 
@@ -310,7 +309,7 @@ This project is open source and available under the [MIT License](LICENSE).
 - Product images sourced from Pinterest
 - UI components from [shadcn/ui](https://ui.shadcn.com/)
 - Icons from [Lucide](https://lucide.dev/)
-- Inspiration from modern e-commerce platforms
+- Inspiration from modern e-commerce platforms figma designs(https://www.figma.com/design/BVt4jj3jj0nORO0yuBHpZb/75--Ecommerce---Shop-MultiPurpose-Template--Community-?node-id=0-1&t=QPsHjOVRRcTS4p9g-1)
 
 ---
 
