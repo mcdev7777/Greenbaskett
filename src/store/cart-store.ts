@@ -38,7 +38,6 @@ export const useCartStore = create<CartStore>((set, get) => ({
   },
 
   addItem: async (product: Product, quantity = 1) => {
-    // Optimistic update
     const existingItem = get().items.find(item => item.productId === product.id);
     const previousItems = get().items;
 
@@ -65,10 +64,8 @@ export const useCartStore = create<CartStore>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       await api.addToCart(product.id, quantity);
-      // Refetch to ensure sync
       await get().fetchCart();
     } catch (error) {
-      // Rollback on error
       set({ items: previousItems, isLoading: false });
       const errorMessage = error instanceof Error ? error.message : 'Failed to add item';
       set({ error: errorMessage });
@@ -83,7 +80,6 @@ export const useCartStore = create<CartStore>((set, get) => ({
     }
     
     const previousItems = get().items;
-    // Optimistic update
     set(state => ({
       items: state.items.map(item =>
         item.id === id ? { ...item, quantity } : item
@@ -106,7 +102,6 @@ export const useCartStore = create<CartStore>((set, get) => ({
 
   removeItem: async (id: string) => {
     const previousItems = get().items;
-    // Optimistic update
     set(state => ({
       items: state.items.filter(item => item.id !== id)
     }));
@@ -117,7 +112,6 @@ export const useCartStore = create<CartStore>((set, get) => ({
       await get().fetchCart();
       toast.success('Item removed from cart');
     } catch (error) {
-      // Rollback on error
       set({ items: previousItems, isLoading: false });
       const errorMessage = error instanceof Error ? error.message : 'Failed to remove item';
       set({ error: errorMessage });
@@ -127,7 +121,6 @@ export const useCartStore = create<CartStore>((set, get) => ({
 
   clearCart: async () => {
     const previousItems = get().items;
-    // Optimistic update
     set({ items: [] });
 
     set({ isLoading: true, error: null });
@@ -136,7 +129,6 @@ export const useCartStore = create<CartStore>((set, get) => ({
       set({ items: [], isLoading: false });
       toast.success('Cart cleared');
     } catch (error) {
-      // Rollback on error
       set({ items: previousItems, isLoading: false });
       const errorMessage = error instanceof Error ? error.message : 'Failed to clear cart';
       set({ error: errorMessage });

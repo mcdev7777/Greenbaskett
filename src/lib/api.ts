@@ -186,9 +186,7 @@ export const api = {
           .select(`*, product:products(*)`)
           .single();
 
-        if (error) throw error;
-        toast.success('Added to cart');
-        
+        if (error) throw error; 
         return {
           id: data.id,
           productId: data.product_id,
@@ -238,7 +236,6 @@ export const api = {
     try {
       const { error } = await supabase.from('cart').delete().eq('id', id);
       if (error) throw error;
-      toast.success('Removed from cart');
     } catch (error: any) {
       toast.error('Failed to remove item from cart');
       throw error;

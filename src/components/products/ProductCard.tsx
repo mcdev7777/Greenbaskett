@@ -43,6 +43,8 @@ export function ProductCard({ product, viewMode = "grid", compact = false }: Pro
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
+    if (isItemInCart) return; // Prevent action if already in cart
+    
     setIsCartAdding(true);
     try {
       await addItem(product, 1);
@@ -113,9 +115,11 @@ export function ProductCard({ product, viewMode = "grid", compact = false }: Pro
           </button>
           <button 
             onClick={handleAddToCart}
-            disabled={!isInStock || isCartAdding}
-            className={`w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-200 disabled:opacity-50 ${
-              isItemInCart ? 'bg-green-100' : 'bg-gray-100'
+            disabled={!isInStock || isCartAdding || isItemInCart}
+            className={`w-8 h-8 rounded-full flex items-center justify-center disabled:opacity-50 transition ${
+              isItemInCart 
+                ? 'bg-green-100 cursor-not-allowed' 
+                : 'bg-gray-100 hover:bg-gray-200'
             }`}
           >
             {isCartAdding ? (
@@ -239,10 +243,10 @@ export function ProductCard({ product, viewMode = "grid", compact = false }: Pro
         isInStock ? (
           <Button
             onClick={handleAddToCart}
-            disabled={isCartAdding}
-            className={`w-full text-sm ${
+            disabled={isCartAdding || isItemInCart}
+            className={`w-full text-sm transition ${
               isItemInCart 
-                ? 'bg-green-100 hover:bg-green-200 text-green-700 border border-green-300' 
+                ? 'bg-green-100 hover:bg-green-100 text-green-700 border border-green-300 cursor-not-allowed' 
                 : 'bg-green-600 hover:bg-green-700 text-white'
             }`}
             size="sm"
@@ -255,7 +259,7 @@ export function ProductCard({ product, viewMode = "grid", compact = false }: Pro
             ) : isItemInCart ? (
               <>
                 <Check className="w-4 h-4 mr-2" />
-                Added to Cart
+                In Cart
               </>
             ) : (
               <>
@@ -266,8 +270,9 @@ export function ProductCard({ product, viewMode = "grid", compact = false }: Pro
           </Button>
         ) : (
           <Button
+            disabled
             variant="outline"
-            className="w-full text-sm"
+            className="w-full text-sm cursor-not-allowed"
             size="sm"
           >
             Out of Stock
