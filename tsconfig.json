@@ -13,13 +13,14 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
+    "baseUrl": ".",
     "plugins": [
       {
         "name": "next"
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["src/*"]
     }
   },
   "include": [
