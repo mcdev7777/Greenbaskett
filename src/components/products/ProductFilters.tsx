@@ -1,94 +1,97 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
+import { useState, useCallback } from "react";
 import { X } from "lucide-react";
 import { Product } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useProductFilters } from "@/lib/useProductFilters";
 
 interface ProductFiltersProps {
   products: Product[];
-  onFilterChange: (products: Product[]) => void;
   onClose?: () => void;
 }
 
 const categories = [
   { name: "All Categories", slug: "all" },
-  { name: "Cell Phones & Tablets", slug: "phones-tablets", children: [
+  {
+    name: "Cell Phones & Tablets",
+    slug: "Cell Phones & Tablets",
+    children: [
       { name: "All", slug: "all" },
-      { name: "Iphone", slug: "iphone" },
-      { name: "Samsung", slug: "samsung" },
-      { name: "Xiaomi", slug: "xiaomi" },
-      { name: "Asus", slug: "asus" },
-      { name: "Oppo", slug: "oppo" },
-      { name: "Gaming Smartphone", slug: "gaming" },
-      { name: "Ipad", slug: "ipad" },
-      { name: "Window Tablets", slug: "windows" },
-      { name: "eReader", slug: "ereader" },
-      { name: "Smartphone Chargers", slug: "chargers" },
-      { name: "5G Support Smartphone", slug: "5g" },
-      { name: "Smartphone Accessories", slug: "accessories" },
-      { name: "Tablets Accessories", slug: "tablet-accessories" },
-      { name: "Cell Phones $200", slug: "phones-200" },
-    ]
-  }
-];
-
-const brands = [
-  { name: "envato", count: 14 },
-  { name: "codecanyon", count: 6 },
-  { name: "videohive", count: 7 },
-  { name: "photodune", count: 18 },
-  { name: "microlancer", count: 1 },
+      { name: "iPhone", slug: "iPhone" },
+      { name: "Samsung", slug: "Samsung" },
+      { name: "Google Pixel", slug: "Google" },
+      { name: "OnePlus", slug: "OnePlus" },
+      { name: "Xiaomi", slug: "Xiaomi" },
+      { name: "OPPO", slug: "OPPO" },
+      { name: "Motorola", slug: "Motorola" },
+      { name: "Tablets", slug: "Tablets" },
+    ],
+  },
 ];
 
 const colors = [
-  { name: "Red", value: "red", color: "bg-red-600" },
-  { name: "Blue", value: "blue", color: "bg-blue-600" },
-  { name: "Sky", value: "sky", color: "bg-sky-400" },
   { name: "Black", value: "black", color: "bg-black" },
-  { name: "Green", value: "green", color: "bg-green-600" },
-  { name: "Gray", value: "gray", color: "bg-gray-500" },
+  { name: "Blue", value: "blue", color: "bg-blue-600" },
   { name: "Purple", value: "purple", color: "bg-purple-600" },
-];
-
-const memories = [
-  { name: "12GB", count: 4 },
-  { name: "1.5GB", count: 1 },
-  { name: "8GB", count: 3 },
-  { name: "1GB", count: 1 },
-  { name: "6GB", count: 12 },
-  { name: "512MB", count: 2 },
-  { name: "4GB", count: 6 },
-  { name: "3GB", count: 7 },
+  { name: "Red", value: "red", color: "bg-red-600" },
+  { name: "Gray", value: "gray", color: "bg-gray-500" },
+  { name: "Silver", value: "silver", color: "bg-gray-300" },
 ];
 
 const conditions = [
-  { name: "New", count: 21 },
-  { name: "Like New", count: 2 },
-  { name: "Open Box", count: 38 },
+  { name: "New", value: "New" },
+  { name: "Like New", value: "Like New" },
+  { name: "Open Box", value: "Open Box" },
 ];
 
 const screenSizes = [
-  { name: '7" & Under' },
-  { name: '7.1" - 8.9"' },
-  { name: '9" - 10.9"' },
-  { name: '11" & Greater' },
+  { name: '5" - 6"', value: "6\"" },
+  { name: '6" - 7"', value: "6.7\"" },
+  { name: '6.7" - 6.8"', value: "6.78\"" },
+  { name: "7\" & Up", value: "7.6\"" },
+  { name: "11\" - 12\"", value: "11\"" },
+  { name: "12.9\" & Up", value: "12.9\"" },
 ];
 
-export function ProductFilters({ products, onFilterChange, onClose }: ProductFiltersProps) {
-  const [priceRange, setPriceRange] = useState({ min: 45, max: 10000 });
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [expandedCategories, setExpandedCategories] = useState<string[]>(["phones-tablets"]);
+export function ProductFilters({ products, onClose }: ProductFiltersProps) {
+  const { filters, toggleFilter, updateFilter, activeFilterCount, resetFilters } =
+    useProductFilters(products);
+
+  const [expandedCategories, setExpandedCategories] = useState<string[]>(["Cell Phones & Tablets"]);
 
   const toggleCategory = (slug: string) => {
-    setExpandedCategories(prev =>
-      prev.includes(slug)
-        ? prev.filter(s => s !== slug)
-        : [...prev, slug]
+    setExpandedCategories((prev) =>
+      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]
     );
+  };
+
+  // Get unique values from products for dynamic filter counts
+  const getBrandOptions = useCallback(() => {
+    const brands = [...new Set(products.map((p) => p.brand))].sort();
+    return brands.map((brand) => ({
+      name: brand,
+      value: brand,
+      count: products.filter((p) => p.brand === brand).length,
+    }));
+  }, [products]);
+
+  const getMemoryOptions = useCallback(() => {
+    const memories = [...new Set(products.map((p) => p.memory))].filter((m) => m !== "N/A").sort();
+    return memories.map((memory) => ({
+      name: memory,
+      value: memory,
+      count: products.filter((p) => p.memory === memory).length,
+    }));
+  }, [products]);
+
+  const handlePriceChange = (type: "min" | "max", value: number) => {
+    if (type === "min") {
+      updateFilter("priceMin", Math.max(0, Math.min(value, filters.priceMax)));
+    } else {
+      updateFilter("priceMax", Math.min(10000, Math.max(value, filters.priceMin)));
+    }
   };
 
   return (
@@ -103,14 +106,22 @@ export function ProductFilters({ products, onFilterChange, onClose }: ProductFil
         </div>
       )}
 
+      {/* Filter Header with Reset */}
+      <div className="flex items-center justify-between">
+        <h3 className="font-bold text-lg">FILTERS</h3>
+        {activeFilterCount > 0 && (
+          <button
+            onClick={resetFilters}
+            className="text-sm text-green-600 hover:text-green-700 font-medium"
+          >
+            Reset All ({activeFilterCount})
+          </button>
+        )}
+      </div>
+
       {/* Categories */}
       <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-lg">CATEGORIES</h3>
-          <Button variant="link" className="text-sm text-green-600 p-0 h-auto">
-            Reset All
-          </Button>
-        </div>
+        <h3 className="font-bold text-sm mb-4 uppercase">Categories</h3>
 
         <div className="space-y-2">
           {categories.map((category) => (
@@ -121,19 +132,20 @@ export function ProductFilters({ products, onFilterChange, onClose }: ProductFil
               >
                 {category.name}
               </button>
-              
+
               {category.children && expandedCategories.includes(category.slug) && (
                 <div className="ml-4 space-y-1 mt-1">
                   {category.children.map((child) => (
-                    <button
+                    <label
                       key={child.slug}
-                      onClick={() => setSelectedCategory(child.slug)}
-                      className={`block w-full text-left px-3 py-2 text-sm rounded hover:bg-gray-50 ${
-                        selectedCategory === child.slug ? "text-green-600 font-medium" : "text-gray-700"
-                      }`}
+                      className="flex items-center gap-2 cursor-pointer py-1 px-3 rounded hover:bg-gray-50"
                     >
-                      {child.name}
-                    </button>
+                      <Checkbox
+                        checked={filters.categories.includes(child.slug)}
+                        onCheckedChange={() => toggleFilter("categories", child.slug)}
+                      />
+                      <span className="text-sm text-gray-700">{child.name}</span>
+                    </label>
                   ))}
                 </div>
               )}
@@ -142,26 +154,16 @@ export function ProductFilters({ products, onFilterChange, onClose }: ProductFil
         </div>
       </div>
 
-      {/* Active Filters */}
-      <div className="border-t pt-4">
-        <div className="flex items-center gap-2 text-sm">
-          <span className="px-2 py-1 bg-gray-100 rounded">Min: $45.00</span>
-          <span className="px-2 py-1 bg-gray-100 rounded">10.9 inch</span>
-          <span className="px-2 py-1 bg-gray-100 rounded">Color: Red</span>
-          <span className="px-2 py-1 bg-gray-100 rounded">128GB</span>
-        </div>
-      </div>
-
       {/* Price Range */}
       <div className="border-t pt-4">
-        <h3 className="font-bold mb-4">By Price</h3>
+        <h3 className="font-bold text-sm mb-4 uppercase">Price Range</h3>
         <div className="space-y-4">
           <input
             type="range"
             min="0"
             max="10000"
-            value={priceRange.max}
-            onChange={(e) => setPriceRange({ ...priceRange, max: parseInt(e.target.value) })}
+            value={filters.priceMax}
+            onChange={(e) => handlePriceChange("max", parseInt(e.target.value))}
             className="w-full accent-green-600"
           />
           <div className="flex items-center gap-2">
@@ -169,8 +171,8 @@ export function ProductFilters({ products, onFilterChange, onClose }: ProductFil
               <span className="text-sm">$</span>
               <input
                 type="number"
-                value={priceRange.min}
-                onChange={(e) => setPriceRange({ ...priceRange, min: parseInt(e.target.value) })}
+                value={filters.priceMin}
+                onChange={(e) => handlePriceChange("min", parseInt(e.target.value))}
                 className="w-full outline-none ml-1 text-sm"
               />
             </div>
@@ -179,30 +181,25 @@ export function ProductFilters({ products, onFilterChange, onClose }: ProductFil
               <span className="text-sm">$</span>
               <input
                 type="number"
-                value={priceRange.max}
-                onChange={(e) => setPriceRange({ ...priceRange, max: parseInt(e.target.value) })}
+                value={filters.priceMax}
+                onChange={(e) => handlePriceChange("max", parseInt(e.target.value))}
                 className="w-full outline-none ml-1 text-sm"
               />
             </div>
-            <Button className="bg-green-600 hover:bg-green-700 px-4">Go</Button>
           </div>
         </div>
       </div>
 
       {/* Brands */}
       <div className="border-t pt-4">
-        <h3 className="font-bold mb-4">By Brands</h3>
-        <div className="mb-3">
-          <input
-            type="text"
-            placeholder="Search brands..."
-            className="w-full border rounded px-3 py-2 text-sm"
-          />
-        </div>
+        <h3 className="font-bold text-sm mb-4 uppercase">Brands</h3>
         <div className="space-y-2">
-          {brands.map((brand) => (
-            <label key={brand.name} className="flex items-center gap-2 cursor-pointer">
-              <Checkbox />
+          {getBrandOptions().map((brand) => (
+            <label key={brand.value} className="flex items-center gap-2 cursor-pointer">
+              <Checkbox
+                checked={filters.brands.includes(brand.value)}
+                onCheckedChange={() => toggleFilter("brands", brand.value)}
+              />
               <span className="text-sm flex-1">{brand.name}</span>
               <span className="text-xs text-gray-500">({brand.count})</span>
             </label>
@@ -212,11 +209,14 @@ export function ProductFilters({ products, onFilterChange, onClose }: ProductFil
 
       {/* Rating */}
       <div className="border-t pt-4">
-        <h3 className="font-bold mb-4">By Rating</h3>
+        <h3 className="font-bold text-sm mb-4 uppercase">By Rating</h3>
         <div className="space-y-2">
-          {[5, 4, 3, 2].map((rating) => (
+          {[5, 4, 3].map((rating) => (
             <label key={rating} className="flex items-center gap-2 cursor-pointer">
-              <Checkbox />
+              <Checkbox
+                checked={filters.rating === rating}
+                onCheckedChange={() => updateFilter("rating", filters.rating === rating ? 0 : rating)}
+              />
               <div className="flex items-center gap-1">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <span key={i} className={i < rating ? "text-yellow-400" : "text-gray-300"}>
@@ -224,9 +224,7 @@ export function ProductFilters({ products, onFilterChange, onClose }: ProductFil
                   </span>
                 ))}
               </div>
-              <span className="text-xs text-gray-500 ml-auto">
-                ({rating === 5 ? 52 : rating === 4 ? 24 : rating === 3 ? 5 : 1})
-              </span>
+              <span className="text-xs text-gray-500 ml-auto">& up</span>
             </label>
           ))}
         </div>
@@ -234,12 +232,17 @@ export function ProductFilters({ products, onFilterChange, onClose }: ProductFil
 
       {/* Screen Size */}
       <div className="border-t pt-4">
-        <h3 className="font-bold mb-4">By Screen Size</h3>
+        <h3 className="font-bold text-sm mb-4 uppercase">Screen Size</h3>
         <div className="flex flex-wrap gap-2">
           {screenSizes.map((size) => (
             <button
-              key={size.name}
-              className="px-3 py-1 border rounded hover:border-green-600 hover:text-green-600 text-sm"
+              key={size.value}
+              onClick={() => toggleFilter("screenSize", size.value)}
+              className={`px-3 py-1 border rounded text-sm transition-colors ${
+                filters.screenSize.includes(size.value)
+                  ? "bg-green-600 text-white border-green-600"
+                  : "border-gray-300 hover:border-green-600 hover:text-green-600"
+              }`}
             >
               {size.name}
             </button>
@@ -249,12 +252,17 @@ export function ProductFilters({ products, onFilterChange, onClose }: ProductFil
 
       {/* Colors */}
       <div className="border-t pt-4">
-        <h3 className="font-bold mb-4">By Color</h3>
+        <h3 className="font-bold text-sm mb-4 uppercase">Color</h3>
         <div className="flex flex-wrap gap-3">
           {colors.map((color) => (
             <button
               key={color.value}
-              className={`w-10 h-10 rounded-full border-2 border-gray-300 hover:border-green-600 ${color.color}`}
+              onClick={() => toggleFilter("colors", color.value)}
+              className={`w-10 h-10 rounded-full border-2 transition-colors ${
+                filters.colors.includes(color.value)
+                  ? `${color.color} border-green-600`
+                  : `${color.color} border-gray-300 hover:border-green-600`
+              }`}
               title={color.name}
             />
           ))}
@@ -263,11 +271,14 @@ export function ProductFilters({ products, onFilterChange, onClose }: ProductFil
 
       {/* Memory */}
       <div className="border-t pt-4">
-        <h3 className="font-bold mb-4">By Memory</h3>
+        <h3 className="font-bold text-sm mb-4 uppercase">Memory</h3>
         <div className="grid grid-cols-2 gap-2">
-          {memories.map((memory) => (
-            <label key={memory.name} className="flex items-center gap-2 cursor-pointer">
-              <Checkbox />
+          {getMemoryOptions().map((memory) => (
+            <label key={memory.value} className="flex items-center gap-2 cursor-pointer">
+              <Checkbox
+                checked={filters.memory.includes(memory.value)}
+                onCheckedChange={() => toggleFilter("memory", memory.value)}
+              />
               <span className="text-sm">{memory.name}</span>
               <span className="text-xs text-gray-500">({memory.count})</span>
             </label>
@@ -275,32 +286,22 @@ export function ProductFilters({ products, onFilterChange, onClose }: ProductFil
         </div>
       </div>
 
-      {/* Conditions */}
+      {/* Condition */}
       <div className="border-t pt-4">
-        <h3 className="font-bold mb-4">By Conditions</h3>
+        <h3 className="font-bold text-sm mb-4 uppercase">Condition</h3>
         <div className="space-y-2">
           {conditions.map((condition) => (
-            <label key={condition.name} className="flex items-center gap-2 cursor-pointer">
-              <Checkbox />
+            <label key={condition.value} className="flex items-center gap-2 cursor-pointer">
+              <Checkbox
+                checked={filters.condition.includes(condition.value)}
+                onCheckedChange={() => toggleFilter("condition", condition.value)}
+              />
               <span className="text-sm">{condition.name}</span>
-              <span className="text-xs text-gray-500 ml-auto">({condition.count})</span>
+              <span className="text-xs text-gray-500 ml-auto">
+                ({products.filter((p) => p.condition === condition.value).length})
+              </span>
             </label>
           ))}
-        </div>
-      </div>
-
-      {/* Promotional Banner */}
-      <div className="border-t pt-4">
-        <div className="relative bg-gradient-to-br from-gray-800 to-black rounded-lg p-6 h-48 overflow-hidden">
-          <div className="relative z-10 text-white">
-            <h3 className="text-xl font-bold mb-4">
-              OKODo hero 11+
-              <br />
-              5K wireless
-            </h3>
-            <p className="text-sm text-gray-400 mb-1">FROM</p>
-            <p className="text-2xl font-bold text-green-500">$169</p>
-          </div>
         </div>
       </div>
     </div>

@@ -9,6 +9,12 @@ export interface Product {
   category: string;
   inventory: number;
   isActive: boolean;
+  brand: string;
+  rating: number;
+  screenSize: string;
+  color: string;
+  memory: string;
+  condition: "New" | "Like New" | "Open Box";
 }
 
 export interface CartItem {

@@ -6,6 +6,7 @@ import { ProductGrid } from "@/components/products/ProductGrid";
 import { Product } from "@/types";
 import { Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useProductFilters } from "@/lib/useProductFilters";
 
 interface ProductsContentProps {
   products: Product[];
@@ -13,7 +14,7 @@ interface ProductsContentProps {
 
 export function ProductsContent({ products }: ProductsContentProps) {
   const [showFilters, setShowFilters] = useState(false);
-  const [filteredProducts, setFilteredProducts] = useState(products);
+  const { filteredProducts } = useProductFilters(products);
 
   return (
     <section className="container mx-auto px-4 py-8">
@@ -38,7 +39,6 @@ export function ProductsContent({ products }: ProductsContentProps) {
         >
           <ProductFilters
             products={products}
-            onFilterChange={setFilteredProducts}
             onClose={() => setShowFilters(false)}
           />
         </aside>
